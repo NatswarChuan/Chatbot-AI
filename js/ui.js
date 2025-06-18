@@ -2,13 +2,13 @@ import * as dom from './dom.js';
 import state from './state.js';
 import { TRANSLATIONS, MINUTE_TIME_WINDOW, MINUTE_MESSAGE_LIMIT, DAILY_MESSAGE_LIMIT, SUPPORTED_LANGUAGES } from './config.js';
 import { getNextDailyResetTimestamp } from './utils.js';
+
 /**
  * Xử lý sự kiện sao chép mã từ một khối mã.
  * @param {Event} event - Sự kiện click.
  * @param {HTMLElement} codeElement - Phần tử chứa mã cần sao chép.
  * @param {HTMLButtonElement} buttonElement - Nút sao chép.
  */
-
 function handleCopyCode(event, codeElement, buttonElement) {
     event.stopPropagation();
     const codeToCopy = codeElement.innerText;
@@ -161,12 +161,21 @@ export function checkRateLimitsAndToggleButtonState() {
     const isInputEmpty = dom.chatInput.value.trim() === '';
     const isRateLimited = minuteCount >= MINUTE_MESSAGE_LIMIT || dailyCount >= DAILY_MESSAGE_LIMIT;
 
-    dom.sendButton.disabled = isInputEmpty || isRateLimited || !state.currentApiKey || state.isApiCallInProgress;
-    dom.chatInput.disabled = isRateLimited || !state.currentApiKey || state.isApiCallInProgress;
+    if (state.isApiCallInProgress) {
+        dom.sendButton.classList.add('hidden');
+        dom.stopGeneratingButton.classList.remove('hidden');
+        dom.stopGeneratingButton.disabled = false;
+        dom.chatInput.disabled = true;
+    } else {
+        dom.sendButton.classList.remove('hidden');
+        dom.stopGeneratingButton.classList.add('hidden');
+        dom.sendButton.disabled = isInputEmpty || isRateLimited || !state.currentApiKey;
+        dom.chatInput.disabled = isRateLimited || !state.currentApiKey;
+    }
 
-    if (!state.currentApiKey) {
+    if (!state.currentApiKey && !state.isApiCallInProgress) {
         showInputError("inputErrorApiKey");
-    } else if (isRateLimited) {
+    } else if (isRateLimited && !state.isApiCallInProgress) {
         showInputError("inputErrorRateLimit");
     } else {
         clearInputError();
@@ -218,4 +227,35 @@ export function initializeLanguage() {
     const langToApply = savedLang || (SUPPORTED_LANGUAGES.includes(browserLang) ? browserLang : SUPPORTED_LANGUAGES[0]);
 
     setLanguage(langToApply);
+}
+
+/**
+ * Thêm nút "Sao chép" vào bong bóng tin nhắn của AI để sao chép toàn bộ nội dung.
+ * @param {HTMLElement} messageElement - Phần tử .message-bubble của tin nhắn AI.
+ */
+export function addCopyMessageButton(messageElement) {
+    const contentElement = messageElement.querySelector('.message-content');
+    if (!contentElement || messageElement.querySelector('.copy-message-button')) {
+        return;
+    }
+
+    const copyButton = document.createElement('button');
+    copyButton.className = 'copy-message-button';
+    copyButton.title = 'Sao chép nội dung';
+    copyButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+
+    copyButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const textToCopy = contentElement.innerText;
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            copyButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+            setTimeout(() => {
+                copyButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+            }, 2000);
+        }).catch(err => {
+            console.error('Không thể sao chép tin nhắn:', err);
+        });
+    });
+
+    messageElement.appendChild(copyButton);
 }

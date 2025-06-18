@@ -1,7 +1,7 @@
 import { GoogleGenAI } from 'https://cdn.jsdelivr.net/npm/@google/genai@1.5.1/+esm';
 import state from './state.js';
 import { AI_MODEL_NAME, SUB_PROMPT, PING_PROMPT, TRANSLATIONS } from './config.js';
-import { addMessage, showApiKeyModal, checkRateLimitsAndToggleButtonState, addCopyButtons } from './ui.js';
+import { addMessage, showApiKeyModal, checkRateLimitsAndToggleButtonState, addCopyButtons, addCopyMessageButton } from './ui.js';
 import * as dom from './dom.js';
 
 /**
@@ -13,7 +13,7 @@ function getCurrentFullLanguageName() {
 }
 
 /**
- * Gửi yêu cầu đến API của AI và hiển thị phản hồi dưới dạng luồng.
+ * Gửi yêu cầu đến API của AI và hiển thị phản hồi.
  * @async
  * @param {string} userPromptContent - Nội dung prompt từ người dùng.
  */
@@ -25,17 +25,73 @@ export async function getAIResponse(userPromptContent) {
     }
 
     state.isApiCallInProgress = true;
+    state.stopGeneration = false;
     checkRateLimitsAndToggleButtonState();
 
     const fullLanguageName = getCurrentFullLanguageName();
     const completePromptText = userPromptContent + SUB_PROMPT + fullLanguageName;
-
     const aiMessageContent = addMessage("", 'ai');
-    let fullResponse = "";
+
+    let textQueue = "";
+    let fullResponseText = "";
+    let streamFinished = false;
+    let lastCharTypedTime = Date.now();
+    const PAUSE_BEFORE_BLINK_MS = 600;
+    const CURSOR_CHAR = '▋';
+
+    function renderLoop(currentTime) {
+        const chatBox = dom.chatMessages;
+        const scrollThreshold = 50; 
+        const isScrolledToBottom = chatBox.scrollHeight - chatBox.clientHeight <= chatBox.scrollTop + scrollThreshold;
+        const timeSinceLastChar = Date.now() - lastCharTypedTime;
+
+        if (textQueue.length > 0) {
+            fullResponseText += textQueue.substring(0, 1);
+            textQueue = textQueue.substring(1);
+            lastCharTypedTime = Date.now();
+        }
+
+        let cursorVisible = true;
+        if (timeSinceLastChar > PAUSE_BEFORE_BLINK_MS) {
+            const BLINK_CYCLE_MS = 1000;
+            cursorVisible = (currentTime % BLINK_CYCLE_MS) < (BLINK_CYCLE_MS / 2);
+        }
+        const currentCursor = cursorVisible ? CURSOR_CHAR : '';
+        const CURSOR_HTML = `<span class="streaming-cursor">${currentCursor}</span>`;
+
+        try {
+            let html = marked.parse(fullResponseText + CURSOR_HTML);
+            aiMessageContent.innerHTML = html;
+        } catch(e) {
+            console.error("Lỗi khi render nội dung:", e);
+        }
+        
+        if (isScrolledToBottom) {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+        
+        if (!streamFinished || textQueue.length > 0) {
+            requestAnimationFrame(renderLoop);
+        } else {
+            aiMessageContent.innerHTML = marked.parse(fullResponseText);
+            addCopyButtons(aiMessageContent); 
+            const messageBubble = aiMessageContent.parentElement;
+            if (messageBubble) {
+                addCopyMessageButton(messageBubble); 
+            }
+            aiMessageContent.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightElement(block);
+            });
+            if (isScrolledToBottom) {
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        }
+    }
+
+    requestAnimationFrame(renderLoop);
 
     try {
         const genAI = new GoogleGenAI({ apiKey: state.currentApiKey });
-        
         const stream = await genAI.models.generateContentStream({
             model: AI_MODEL_NAME,
             contents: [{ role: "user", parts: [{ text: completePromptText }] }],
@@ -43,30 +99,20 @@ export async function getAIResponse(userPromptContent) {
         });
 
         for await (const chunk of stream) {
-            const chunkText = chunk.candidates?.[0]?.content?.parts?.[0]?.text || "";
-            fullResponse += chunkText;
-            aiMessageContent.innerHTML = marked.parse(fullResponse);
-            dom.chatMessages.scrollTop = dom.chatMessages.scrollHeight;
+            if (state.stopGeneration) {
+                break;
+            }
+            textQueue += chunk.candidates?.[0]?.content?.parts?.[0]?.text || "";
         }
-        
-        addCopyButtons(aiMessageContent);
-        aiMessageContent.querySelectorAll('pre code').forEach((block) => {
-            hljs.highlightElement(block);
-        });
-
     } catch (error) {
         console.error('Lỗi API:', error);
-        const errorMessage = `**${TRANSLATIONS[state.currentLanguage].errorAIGeneric.replace('{errorMessage}', error.message)}**`;
-        if (fullResponse) {
-             aiMessageContent.innerHTML = marked.parse(fullResponse + '\n\n' + errorMessage);
-        } else {
-            aiMessageContent.innerHTML = marked.parse(errorMessage);
-        }
+        textQueue += `\n\n**${TRANSLATIONS[state.currentLanguage].errorAIGeneric.replace('{errorMessage}', error.message)}**`;
         alert(TRANSLATIONS[state.currentLanguage].errorAIGeneric.replace('{errorMessage}', error.message));
     } finally {
+        streamFinished = true;
         state.isApiCallInProgress = false;
+        state.stopGeneration = false;
         checkRateLimitsAndToggleButtonState();
-        dom.chatMessages.scrollTop = dom.chatMessages.scrollHeight;
     }
 }
 

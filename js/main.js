@@ -42,7 +42,6 @@ function initializeTheme() {
  */
 function handleSendMessage() {
     if (state.isApiCallInProgress) {
-        console.log("Yêu cầu trước đó đang được xử lý. Vui lòng đợi.");
         return;
     }
     const message = dom.chatInput.value.trim();
@@ -59,6 +58,13 @@ function handleSendMessage() {
     getAIResponse(message);
     dom.chatInput.value = '';
     checkRateLimitsAndToggleButtonState();
+}
+
+/**
+ * Xử lý yêu cầu ngừng tạo phản hồi từ AI.
+ */
+function handleStopGeneration() {
+    state.stopGeneration = true;
 }
 
 /**
@@ -124,7 +130,6 @@ function closeSettingsMenuOnClickOutside(event) {
     }
 }
 
-// Gán sự kiện cho các phần tử DOM
 dom.settingsMenuButton.addEventListener('click', toggleSettingsMenu);
 document.addEventListener('click', closeSettingsMenuOnClickOutside);
 
@@ -136,8 +141,8 @@ dom.menuLanguageToggle.addEventListener('click', () => {
     setLanguage(SUPPORTED_LANGUAGES[nextIndex]);
 });
 
-// Gán sự kiện cho việc gửi tin nhắn và nhập liệu
 dom.sendButton.addEventListener('click', handleSendMessage);
+dom.stopGeneratingButton.addEventListener('click', handleStopGeneration);
 dom.chatInput.addEventListener('keypress', (event) => {
     if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault();
@@ -146,10 +151,8 @@ dom.chatInput.addEventListener('keypress', (event) => {
 });
 dom.chatInput.addEventListener('input', checkRateLimitsAndToggleButtonState);
 
-// Gán sự kiện cho modal API key
 dom.saveApiKeyButton.addEventListener('click', handleSaveApiKey);
 dom.closeApiKeyModalButton.addEventListener('click', hideApiKeyModal);
-// Đóng modal khi click ra ngoài vùng nội dung của modal
 dom.apiKeyModal.addEventListener('click', (event) => {
     if (event.target === dom.apiKeyModal) hideApiKeyModal();
 });
@@ -160,7 +163,6 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
-// Khởi tạo ứng dụng khi DOM đã tải xong
 document.addEventListener('DOMContentLoaded', () => {
     initializeApiKey();
     initializeTheme();

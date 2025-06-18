@@ -6,6 +6,8 @@
 export const chatInput = document.getElementById('chatInput');
 /** @type {HTMLButtonElement} Nút gửi tin nhắn. */
 export const sendButton = document.getElementById('sendButton');
+/** @type {HTMLButtonElement} Nút ngừng tạo phản hồi. */
+export const stopGeneratingButton = document.getElementById('stopGeneratingButton');
 /** @type {HTMLDivElement} Vùng hiển thị các tin nhắn chat. */
 export const chatMessages = document.getElementById('chatMessages');
 /** @type {HTMLDivElement} Modal nhập API key. */
