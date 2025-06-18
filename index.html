@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- SEO Tags -->
   <title>Chatbot AI - Trò chuyện và Hỏi đáp</title>
-  <meta name="description" content="Chatbot AI thông minh, sẵn sàng trò chuyện, giải đáp thắc mắc và hỗ trợ bạn với nhiều chủ đề khác nhau.">
+  <meta name="description"
+    content="Chatbot AI thông minh, sẵn sàng trò chuyện, giải đáp thắc mắc và hỗ trợ bạn với nhiều chủ đề khác nhau.">
   <meta name="keywords" content="chatbot, ai, trí tuệ nhân tạo, hỏi đáp, trò chuyện, gemma, google ai">
   <meta name="author" content="NatswarChuan">
   <meta name="robots" content="index, follow">
@@ -15,14 +17,16 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://natswarchuan.github.io/Chatbot-AI/">
   <meta property="og:title" content="Chatbot AI - Trò chuyện và Hỏi đáp">
-  <meta property="og:description" content="Chatbot AI thông minh, sẵn sàng trò chuyện, giải đáp thắc mắc và hỗ trợ bạn với nhiều chủ đề khác nhau.">
+  <meta property="og:description"
+    content="Chatbot AI thông minh, sẵn sàng trò chuyện, giải đáp thắc mắc và hỗ trợ bạn với nhiều chủ đề khác nhau.">
   <meta property="og:image" content="./logo.jpge">
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image">
   <meta property="twitter:url" content="https://natswarchuan.github.io/Chatbot-AI/">
   <meta property="twitter:title" content="Chatbot AI - Trò chuyện và Hỏi đáp">
-  <meta property="twitter:description" content="Chatbot AI thông minh, sẵn sàng trò chuyện, giải đáp thắc mắc và hỗ trợ bạn với nhiều chủ đề khác nhau.">
+  <meta property="twitter:description"
+    content="Chatbot AI thông minh, sẵn sàng trò chuyện, giải đáp thắc mắc và hỗ trợ bạn với nhiều chủ đề khác nhau.">
   <meta property="twitter:image" content="https://natswarchuan.github.io/Chatbot-AI/logo.jpge">
 
   <!-- Favicon -->
@@ -34,47 +38,76 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code&family=Inter:wght@400;600&display=swap"
+    rel="stylesheet">
 </head>
+
 <body>
   <div class="chat-container">
     <div class="chat-header">
       <h1 class="text-lg font-semibold">Chatbot AI</h1>
       <button id="themeToggle" class="theme-toggle-button" title="Chuyển đổi theme">
-        <svg id="themeIconLight" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-        <svg id="themeIconDark" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-      </button>
-    </div>
-    <div class="chat-messages" id="chatMessages">
-      <div class="message-bubble ai-message">
-        <div class="message-content">Xin chào! Tôi có thể giúp gì cho bạn?</div>
-      </div>
-    </div>
-    <div class="chat-input-area">
-      <input type="text" id="chatInput" class="chat-input" placeholder="Nhắn tin cho AI..." autocomplete="off">
-      <button id="sendButton" class="send-button">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-up">
-          <line x1="12" y1="19" x2="12" y2="5"></line>
-          <polyline points="5 12 12 5 19 12"></polyline>
+        <svg id="themeIconLight" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg id="themeIconDark" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          style="display:none;">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
         </svg>
       </button>
     </div>
-    <div class="loading-indicator" id="loadingIndicator">
+    <div class="chat-messages" id="chatMessages">
+    </div>
+    <div class="loading-indicator" id="loadingIndicator" style="display: none;">
       <div class="spinner"></div>
       <span>AI đang trả lời...</span>
     </div>
+    <div class="chat-input-area">
+      <div class="chat-input-main">
+        <div id="chatInputWrapper" class="chat-input-wrapper">
+          <textarea id="chatInput" class="chat-input" placeholder="Nhắn tin cho AI..." autocomplete="off" rows="1"></textarea>
+          <div id="charCounter" class="char-counter">0/2000</div>
+        </div>
+        <button id="sendButton" class="send-button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="feather feather-arrow-up">
+            <line x1="12" y1="19" x2="12" y2="5"></line>
+            <polyline points="5 12 12 5 19 12"></polyline>
+          </svg>
+        </button>
+      </div>
+      <div id="inputErrorMessage" class="input-error-message" style="display: none;"></div>
+    </div>
   </div>
 
-  <div id="apiKeyModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center" style="display: none; pointer-events: none;">
+  <div id="apiKeyModal"
+    class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center"
+    style="display: none; pointer-events: none;">
     <div class="bg-white p-8 rounded-lg shadow-xl w-11/12 max-w-md mx-auto" style="pointer-events: auto;">
       <h2 class="text-2xl font-semibold mb-4 text-gray-800">Nhập API Key của Google AI</h2>
       <p class="mb-6 text-gray-600">
         Để sử dụng chatbot, bạn cần cung cấp API Key. Bạn có thể lấy API Key từ
-        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-blue-600 hover:underline font-medium">Google AI Studio</a>.
+        <a href="https://aistudio.google.com/app/apikey" target="_blank"
+          class="text-blue-600 hover:underline font-medium">Google AI Studio</a>.
       </p>
-      <input type="password" id="apiKeyInput" class="w-full p-3 border border-gray-300 rounded-md mb-6 focus:ring-2 focus:ring-blue-500" placeholder="API Key của bạn">
+      <input type="password" id="apiKeyInput"
+        class="w-full p-3 border border-gray-300 rounded-md mb-6 focus:ring-2 focus:ring-blue-500"
+        placeholder="API Key của bạn">
       <div class="flex justify-end">
-        <button id="saveApiKeyButton" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Lưu Key</button>
+        <button id="saveApiKeyButton"
+          class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Lưu
+          Key</button>
       </div>
     </div>
   </div>
