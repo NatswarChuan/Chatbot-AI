@@ -2,10 +2,18 @@ import { GoogleGenAI } from 'https://cdn.jsdelivr.net/npm/@google/genai@1.5.1/+e
 import state from './state.js';
 import { API_ENDPOINT_BASE, AI_MODEL_NAME, SUB_PROMPT, PING_PROMPT, MAX_REQUEST_TOKENS, TRANSLATIONS } from './config.js';
 import { addMessage, showApiKeyModal, checkRateLimitsAndToggleButtonState, showTypingIndicator, removeTypingIndicator } from './ui.js';
-
+/**
+ * Lấy tên đầy đủ của ngôn ngữ hiện tại dựa trên mã ngôn ngữ.
+ * @returns {string} Tên đầy đủ của ngôn ngữ hiện tại.
+ */
 function getCurrentFullLanguageName() {
     return TRANSLATIONS[state.currentLanguage]?.fullLanguageName || state.currentLanguage;
 }
+/**
+ * Gửi yêu cầu đến API của AI và hiển thị phản hồi.
+ * @async
+ * @param {string} userPromptContent - Nội dung prompt từ người dùng.
+ */
 
 export async function getAIResponse(userPromptContent) {
     if (!state.currentApiKey) {
@@ -15,7 +23,7 @@ export async function getAIResponse(userPromptContent) {
     }
 
     state.isApiCallInProgress = true;
-    showTypingIndicator(); // <-- Hiển thị chỉ báo mới
+    showTypingIndicator();
     checkRateLimitsAndToggleButtonState();
 
     const fullLanguageName = getCurrentFullLanguageName();
@@ -59,11 +67,15 @@ export async function getAIResponse(userPromptContent) {
         alert(TRANSLATIONS[state.currentLanguage].errorAIGeneric.replace('{errorMessage}', error.message));
     } finally {
         state.isApiCallInProgress = false;
-        removeTypingIndicator(); // <-- Xóa chỉ báo
+        removeTypingIndicator();
         checkRateLimitsAndToggleButtonState();
     }
 }
 
+/**
+ * Gửi một yêu cầu "ping" ban đầu đến AI để khởi động hoặc kiểm tra kết nối.
+ * @async
+ */
 export async function sendInitialPingToAI() {
     if (!state.currentApiKey || state.isApiCallInProgress) return;
 

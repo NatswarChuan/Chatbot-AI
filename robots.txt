@@ -1,6 +1,4 @@
-# Cho phép tất cả các trình thu thập dữ liệu truy cập vào toàn bộ trang web
 User-agent: *
 Disallow:
 
-# Vị trí của Sitemap
 Sitemap: https://natswarchuan.github.io/Chatbot-AI/sitemap.xml

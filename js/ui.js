@@ -2,6 +2,12 @@ import * as dom from './dom.js';
 import state from './state.js';
 import { TRANSLATIONS, MINUTE_TIME_WINDOW, MINUTE_MESSAGE_LIMIT, DAILY_MESSAGE_LIMIT, SUPPORTED_LANGUAGES } from './config.js';
 import { getNextDailyResetTimestamp } from './utils.js';
+/**
+ * Xử lý sự kiện sao chép mã từ một khối mã.
+ * @param {Event} event - Sự kiện click.
+ * @param {HTMLElement} codeElement - Phần tử chứa mã cần sao chép.
+ * @param {HTMLButtonElement} buttonElement - Nút sao chép.
+ */
 
 function handleCopyCode(event, codeElement, buttonElement) {
     event.stopPropagation();
@@ -18,6 +24,10 @@ function handleCopyCode(event, codeElement, buttonElement) {
     });
 }
 
+/**
+ * Thêm nút "Copy" vào tất cả các khối mã (`<pre>`) trong một container.
+ * @param {HTMLElement} container - Phần tử DOM chứa các khối mã.
+ */
 export function addCopyButtons(container) {
     const codeBlocks = container.querySelectorAll('pre');
     codeBlocks.forEach(preElement => {
@@ -34,6 +44,12 @@ export function addCopyButtons(container) {
     });
 }
 
+/**
+ * Thêm một tin nhắn vào giao diện chat.
+ * @param {string} messageOrKey - Nội dung tin nhắn hoặc khóa dịch thuật cho tin nhắn.
+ * @param {'user' | 'ai'} sender - Người gửi tin nhắn ('user' hoặc 'ai').
+ * @param {Object.<string, string>} [params={}] - Các tham số để thay thế trong chuỗi dịch (nếu có).
+ */
 export function addMessage(messageOrKey, sender, params = {}) {
     const messageElement = document.createElement('div');
     messageElement.classList.add('message-bubble', `${sender}-message`);
@@ -58,6 +74,9 @@ export function addMessage(messageOrKey, sender, params = {}) {
     dom.chatMessages.scrollTop = dom.chatMessages.scrollHeight;
 }
 
+/**
+ * Hiển thị chỉ báo "AI đang gõ..." trong giao diện chat.
+ */
 export function showTypingIndicator() {
   const bubble = document.createElement('div');
   bubble.classList.add('message-bubble', 'ai-message');
@@ -79,6 +98,9 @@ export function showTypingIndicator() {
   dom.chatMessages.scrollTop = dom.chatMessages.scrollHeight;
 }
 
+/**
+ * Xóa chỉ báo "AI đang gõ..." khỏi giao diện chat.
+ */
 export function removeTypingIndicator() {
   const indicator = document.getElementById('typing-indicator-bubble');
   if (indicator) {
@@ -86,24 +108,40 @@ export function removeTypingIndicator() {
   }
 }
 
+/**
+ * Hiển thị modal nhập API key.
+ */
 export function showApiKeyModal() {
     dom.apiKeyModal.classList.remove('hidden');
     dom.apiKeyModal.style.pointerEvents = 'auto';
     dom.apiKeyInput.focus();
 }
 
+/**
+ * Ẩn modal nhập API key.
+ */
 export function hideApiKeyModal() {
     if (dom.apiKeyModal.classList.contains('hidden')) return;
     dom.apiKeyModal.classList.add('hidden');
     dom.apiKeyModal.style.pointerEvents = 'none';
 }
 
+/**
+ * Xử lý sự kiện nhấn phím Escape để đóng modal.
+ * @param {KeyboardEvent} event - Sự kiện bàn phím.
+ */
 export function handleModalEscapeKey(event) {
     if (event.key === 'Escape' && !dom.apiKeyModal.classList.contains('hidden')) {
         hideApiKeyModal();
     }
 }
 
+/**
+ * Hiển thị thông báo lỗi cho ô nhập liệu chat.
+ * @param {string} messageKey - Khóa dịch thuật cho thông báo lỗi.
+ * @param {Object.<string, string|number>} [params={}] - Các tham số để thay thế trong chuỗi dịch.
+ * Ví dụ: { maxTokens: 100, currentTokens: 150 }
+ */
 export function showInputError(messageKey, params = {}) {
     let translatedMessage = TRANSLATIONS[state.currentLanguage][messageKey] || messageKey;
     for (const key in params) {
@@ -114,12 +152,18 @@ export function showInputError(messageKey, params = {}) {
     dom.chatInputWrapper.classList.add('chat-input-wrapper-error');
 }
 
+/**
+ * Xóa thông báo lỗi khỏi ô nhập liệu chat.
+ */
 export function clearInputError() {
     dom.inputErrorMessage.textContent = '';
     dom.inputErrorMessage.style.display = 'none';
     dom.chatInputWrapper.classList.remove('chat-input-wrapper-error');
 }
 
+/**
+ * Điều chỉnh chiều cao của textarea nhập liệu chat cho vừa với nội dung.
+ */
 export function adjustTextareaHeight() {
     dom.chatInput.style.height = 'auto';
     const maxHeight = 150;
@@ -127,6 +171,9 @@ export function adjustTextareaHeight() {
     dom.chatInput.style.height = `${newHeight}px`;
 }
 
+/**
+ * Kiểm tra giới hạn tin nhắn và cập nhật trạng thái của nút gửi và ô nhập liệu.
+ */
 export function checkRateLimitsAndToggleButtonState() {
     const currentTime = Date.now();
     const currentLength = dom.chatInput.value.length;
@@ -158,6 +205,10 @@ export function checkRateLimitsAndToggleButtonState() {
     adjustTextareaHeight();
 }
 
+/**
+ * Thiết lập ngôn ngữ cho ứng dụng.
+ * @param {string} lang - Mã ngôn ngữ (ví dụ: 'vi', 'en').
+ */
 export function setLanguage(lang) {
     if (!TRANSLATIONS[lang]) {
         lang = SUPPORTED_LANGUAGES[0];
@@ -188,6 +239,9 @@ export function setLanguage(lang) {
     checkRateLimitsAndToggleButtonState();
 }
 
+/**
+ * Khởi tạo ngôn ngữ cho ứng dụng dựa trên lựa chọn đã lưu hoặc ngôn ngữ trình duyệt.
+ */
 export function initializeLanguage() {
     const savedLang = localStorage.getItem('language');
     const browserLang = navigator.language.split('-')[0];
