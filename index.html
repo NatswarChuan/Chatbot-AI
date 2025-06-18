@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatbot Google AI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .chat-container {
+      width: 100%;
+      max-width: 600px;
+      height: 80vh;
+      display: flex;
+      flex-direction: column;
+      background-color: #ffffff;
+      border-radius: 1.5rem;
+
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      margin: 1rem;
+
+    }
+
+    .chat-header {
+      background-color: #4f46e5;
+
+      color: white;
+      padding: 1.5rem;
+
+      font-size: 1.5rem;
+
+      font-weight: 600;
+
+      text-align: center;
+      border-top-left-radius: 1.5rem;
+      border-top-right-radius: 1.5rem;
+    }
+
+    .chat-messages {
+      flex-grow: 1;
+      padding: 1.5rem;
+
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+
+    }
+
+    .message-bubble {
+      max-width: 80%;
+      padding: 0.75rem 1rem;
+
+      border-radius: 1.25rem;
+
+      word-wrap: break-word;
+    }
+
+    .user-message {
+      align-self: flex-end;
+      background-color: #e0f2fe;
+
+      color: #1a202c;
+
+      border-bottom-right-radius: 0.25rem;
+
+    }
+
+    .ai-message {
+      align-self: flex-start;
+      background-color: #f0f4f8;
+
+      color: #1a202c;
+
+      border-bottom-left-radius: 0.25rem;
+
+    }
+
+    .chat-input-area {
+      display: flex;
+      padding: 1rem;
+
+      border-top: 1px solid #e2e8f0;
+
+      background-color: #ffffff;
+      border-bottom-left-radius: 1.5rem;
+      border-bottom-right-radius: 1.5rem;
+    }
+
+    .chat-input {
+      flex-grow: 1;
+      padding: 0.75rem 1.25rem;
+
+      border: 1px solid #cbd5e0;
+
+      border-radius: 1.5rem;
+
+      outline: none;
+      font-size: 1rem;
+
+      transition: border-color 0.2s;
+    }
+
+    .chat-input:focus {
+      border-color: #4f46e5;
+
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+
+    }
+
+    .send-button {
+      margin-left: 0.75rem;
+
+      padding: 0.75rem 1.5rem;
+
+      background-color: #4f46e5;
+
+      color: white;
+      border-radius: 1.5rem;
+
+      font-weight: 600;
+
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+    }
+
+    .send-button:hover {
+      background-color: #4338ca;
+
+    }
+
+    .send-button:active {
+      transform: scale(0.98);
+    }
+
+    .loading-indicator {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-style: italic;
+      color: #6b7280;
+
+    }
+
+    .loading-dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      background-color: #4f46e5;
+      border-radius: 50%;
+      animation: bounce 1.4s infinite ease-in-out both;
+    }
+
+    .loading-dot:nth-child(1) {
+      animation-delay: -0.32s;
+    }
+
+    .loading-dot:nth-child(2) {
+      animation-delay: -0.16s;
+    }
+
+    @keyframes bounce {
+
+      0%,
+      80%,
+      100% {
+        transform: scale(0);
+      }
+
+      40% {
+        transform: scale(1.0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="chat-container">
+    <div class="chat-header">
+      Chatbot thông minh
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <!-- Tin nhắn sẽ được thêm vào đây -->
+      <div class="message-bubble ai-message">Xin chào! Tôi có thể giúp gì cho bạn?</div>
+    </div>
+    <div class="chat-input-area">
+      <input type="text" id="chatInput" class="chat-input" placeholder="Gõ tin nhắn của bạn..." autocomplete="off">
+      <button id="sendButton" class="send-button">
+        Gửi
+        <span class="ml-2">➡️</span>
+      </button>
+    </div>
+    <div class="loading-indicator" id="loadingIndicator">
+      Đang gõ
+      <span class="loading-dot"></span>
+      <span class="loading-dot"></span>
+      <span class="loading-dot"></span>
+    </div>
+  </div>
+
+  <script type="module">
+    const chatInput = document.getElementById('chatInput');
+    const sendButton = document.getElementById('sendButton');
+    const chatMessages = document.getElementById('chatMessages');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+
+    const MINUTE_MESSAGE_LIMIT = 30;
+    const MINUTE_TIME_WINDOW = 60 * 1000;
+    let minuteMessageTimestamps = [];
+
+    const DAILY_MESSAGE_LIMIT = 14400;
+    const DAILY_TIME_WINDOW = 24 * 60 * 60 * 1000;
+    let dailyMessageTimestamps = [];
+
+    function formatAIResponseToHTML(text) {
+      let html = text;
+
+      html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+      html = html.replace(/^\s*---\s*$/gm, '<hr>');
+
+      const lines = html.split('\n');
+      const result = [];
+      let inList = false;
+      let currentParagraphLines = [];
+
+      function flushParagraph() {
+        if (currentParagraphLines.length > 0) {
+          const paragraphText = currentParagraphLines.map(l => l.trim()).filter(l => l !== '').join('<br>');
+          if (paragraphText) {
+            result.push('<p>' + paragraphText + '</p>');
+          }
+          currentParagraphLines = [];
+        }
+      }
+
+      for (const line of lines) {
+        const trimmedLine = line.trim();
+
+        if (trimmedLine === '<hr>') {
+          flushParagraph();
+          if (inList) {
+            result.push('</ul>');
+            inList = false;
+          }
+          result.push(trimmedLine);
+        } else if (trimmedLine.startsWith('* ')) {
+          flushParagraph();
+          if (!inList) {
+            result.push('<ul>');
+            inList = true;
+          }
+          result.push('<li>' + trimmedLine.substring(1).trim() + '</li>');
+        } else {
+          if (inList && trimmedLine !== '') {
+            result.push('</ul>');
+            inList = false;
+          }
+          if (trimmedLine === '') {
+            flushParagraph();
+          } else {
+            currentParagraphLines.push(line);
+          }
+        }
+      }
+
+      flushParagraph();
+      if (inList) {
+        result.push('</ul>');
+      }
+
+      return result.join('\n');
+    }
+
+    function addMessage(message, sender) {
+      const messageElement = document.createElement('div');
+      messageElement.classList.add('message-bubble');
+      if (sender === 'user') {
+        messageElement.classList.add('user-message');
+        messageElement.textContent = message;
+      } else {
+        messageElement.classList.add('ai-message');
+        messageElement.innerHTML = formatAIResponseToHTML(message);
+      }
+      chatMessages.appendChild(messageElement);
+
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+
+    async function getAIResponse(prompt) {
+      loadingIndicator.style.display = 'flex';
+      try {
+        let chatHistory = [];
+        chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+        const payload = {
+          contents: chatHistory,
+        };
+
+
+        const apiKey = "AIzaSyAXFsfBoZFMqiGEubl_xPlrl77KVGFwA94";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemma-3-1b-it:generateContent?key=${apiKey}`;
+
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (result.candidates && result.candidates.length > 0 &&
+          result.candidates[0].content && result.candidates[0].content.parts &&
+          result.candidates[0].content.parts.length > 0) {
+          const text = result.candidates[0].content.parts[0].text;
+          addMessage(text, 'ai');
+        } else {
+          addMessage("Xin lỗi, tôi không thể tạo ra phản hồi vào lúc này. Vui lòng thử lại.", 'ai');
+          console.error("Lỗi: Cấu trúc phản hồi từ API không mong đợi hoặc nội dung bị thiếu.", result);
+        }
+      } catch (error) {
+        console.error('Lỗi khi gọi API Google AI:', error);
+        addMessage("Xin lỗi, có lỗi xảy ra khi kết nối với AI. Vui lòng thử lại sau.", 'ai');
+      } finally {
+        loadingIndicator.style.display = 'none';
+      }
+    }
+
+
+    sendButton.addEventListener('click', () => {
+      const currentTime = Date.now();
+
+
+      minuteMessageTimestamps = minuteMessageTimestamps.filter(timestamp => currentTime - timestamp < MINUTE_TIME_WINDOW);
+      if (minuteMessageTimestamps.length >= MINUTE_MESSAGE_LIMIT) {
+        addMessage("Bạn đã gửi quá nhiều tin nhắn. Vui lòng thử lại sau 1 phút.", 'ai');
+
+        sendButton.disabled = true;
+        setTimeout(() => sendButton.disabled = false, MINUTE_TIME_WINDOW - (currentTime - minuteMessageTimestamps[0]));
+        return;
+      }
+
+
+      dailyMessageTimestamps = dailyMessageTimestamps.filter(timestamp => currentTime - timestamp < DAILY_TIME_WINDOW);
+      if (dailyMessageTimestamps.length >= DAILY_MESSAGE_LIMIT) {
+        addMessage("Bạn đã đạt giới hạn tin nhắn hàng ngày. Vui lòng thử lại sau.", 'ai');
+
+        sendButton.disabled = true;
+        setTimeout(() => sendButton.disabled = false, DAILY_TIME_WINDOW - (currentTime - dailyMessageTimestamps[0]));
+        return;
+      }
+
+      const message = chatInput.value.trim();
+      if (message) {
+        addMessage(message, 'user');
+        minuteMessageTimestamps.push(currentTime);
+        dailyMessageTimestamps.push(currentTime);
+        getAIResponse(message);
+        chatInput.value = '';
+      }
+    });
+
+
+    chatInput.addEventListener('keypress', (event) => {
+      if (event.key === 'Enter') {
+        sendButton.click();
+      }
+    });
+  </script>
+</body>
+
+</html>
