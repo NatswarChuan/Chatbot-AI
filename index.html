@@ -19,7 +19,7 @@
   <meta property="og:title" content="Chatbot AI - Trò chuyện và Hỏi đáp">
   <meta property="og:description"
     content="Chatbot AI thông minh, sẵn sàng trò chuyện, giải đáp thắc mắc và hỗ trợ bạn với nhiều chủ đề khác nhau.">
-  <meta property="og:image" content="./logo.jpge">
+  <meta property="og:image" content="https://natswarchuan.github.io/Chatbot-AI/logo.jpge">
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image">
@@ -30,7 +30,7 @@
   <meta property="twitter:image" content="https://natswarchuan.github.io/Chatbot-AI/logo.jpge">
 
   <!-- Favicon -->
-  <link rel="icon" href="./favicon.ico" type="image/x-icon">
+  <link rel="icon" href="https://natswarchuan.github.io/Chatbot-AI/favicon.ico" type="image/x-icon">
   <link rel="apple-touch-icon" href="https://natswarchuan.github.io/Chatbot-AI/logo.jpeg">
 
   <!-- Styles and Fonts -->
@@ -48,6 +48,9 @@
     <div class="chat-header">
       <h1 class="text-lg font-semibold">Chatbot AI</h1>
       <div class="flex items-center gap-2">
+        <button id="languageToggleButton" class="theme-toggle-button" title="Đổi ngôn ngữ">
+          <span id="languageIndicator" class="text-sm font-semibold">VI</span>
+        </button>
         <button id="showApiKeyModalButton" class="theme-toggle-button" title="Nhập API Key">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
         </button>
@@ -96,10 +99,13 @@
       <div id="inputErrorMessage" class="input-error-message" style="display: none;"></div>
     </div>
   </div>
+  
+  <div id="pingOverlay" class="overlay" style="display: none;">
+  </div>
 
   <div id="apiKeyModal"
     class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center"
-    style="display: none; pointer-events: none;">
+    style="display: none; pointer-events: none; z-index: 1050;">
     <div class="modal-content-box bg-white p-8 rounded-lg shadow-xl w-11/12 max-w-md mx-auto relative" style="pointer-events: auto;">
       <button id="closeApiKeyModalButton" class="modal-close-button" aria-label="Đóng modal">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
