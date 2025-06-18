@@ -14,9 +14,6 @@ export const SUB_PROMPT = `\n***LƯU Ý QUAN TRỌNG***: Chỉ trả lời bằn
 /** @const {string} Prompt được sử dụng để "ping" AI, đảm bảo AI nhận thức được giới hạn token. */
 export const PING_PROMPT = `***LƯU Ý QUAN TRỌNG***: Đảm bảo gói gọn tất cả các yêu cầu đều có tổng cửa sổ ngữ cảnh là 32,768 (32K) token.`;
 
-/** @const {number} Số lượng token tối đa cho một yêu cầu (bao gồm cả prompt và phản hồi). */
-export const MAX_REQUEST_TOKENS = 32768;
-
 /** @const {number} Giới hạn số lượng tin nhắn người dùng có thể gửi trong một phút. */
 export const MINUTE_MESSAGE_LIMIT = 30;
 

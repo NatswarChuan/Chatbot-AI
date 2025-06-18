@@ -49,6 +49,7 @@ export function addCopyButtons(container) {
  * @param {string} messageOrKey - Nội dung tin nhắn hoặc khóa dịch thuật cho tin nhắn.
  * @param {'user' | 'ai'} sender - Người gửi tin nhắn ('user' hoặc 'ai').
  * @param {Object.<string, string>} [params={}] - Các tham số để thay thế trong chuỗi dịch (nếu có).
+ * @returns {HTMLDivElement} The message content element.
  */
 export function addMessage(messageOrKey, sender, params = {}) {
     const messageElement = document.createElement('div');
@@ -66,46 +67,16 @@ export function addMessage(messageOrKey, sender, params = {}) {
         contentWrapper.textContent = messageText;
     } else {
         contentWrapper.innerHTML = marked.parse(messageText);
-        addCopyButtons(contentWrapper);
+        if (messageText) {
+            addCopyButtons(contentWrapper);
+        }
     }
 
     messageElement.appendChild(contentWrapper);
     dom.chatMessages.appendChild(messageElement);
     dom.chatMessages.scrollTop = dom.chatMessages.scrollHeight;
-}
-
-/**
- * Hiển thị chỉ báo "AI đang gõ..." trong giao diện chat.
- */
-export function showTypingIndicator() {
-  const bubble = document.createElement('div');
-  bubble.classList.add('message-bubble', 'ai-message');
-  bubble.id = 'typing-indicator-bubble';
-
-  const content = document.createElement('div');
-  content.classList.add('message-content');
-
-  content.innerHTML = `
-    <div class="typing-indicator">
-      <div class="typing-dot"></div>
-      <div class="typing-dot"></div>
-      <div class="typing-dot"></div>
-    </div>
-  `;
-
-  bubble.appendChild(content);
-  dom.chatMessages.appendChild(bubble);
-  dom.chatMessages.scrollTop = dom.chatMessages.scrollHeight;
-}
-
-/**
- * Xóa chỉ báo "AI đang gõ..." khỏi giao diện chat.
- */
-export function removeTypingIndicator() {
-  const indicator = document.getElementById('typing-indicator-bubble');
-  if (indicator) {
-    indicator.remove();
-  }
+    
+    return contentWrapper;
 }
 
 /**
@@ -140,7 +111,6 @@ export function handleModalEscapeKey(event) {
  * Hiển thị thông báo lỗi cho ô nhập liệu chat.
  * @param {string} messageKey - Khóa dịch thuật cho thông báo lỗi.
  * @param {Object.<string, string|number>} [params={}] - Các tham số để thay thế trong chuỗi dịch.
- * Ví dụ: { maxTokens: 100, currentTokens: 150 }
  */
 export function showInputError(messageKey, params = {}) {
     let translatedMessage = TRANSLATIONS[state.currentLanguage][messageKey] || messageKey;
