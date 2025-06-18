@@ -4,10 +4,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <title>Chatbot AI: Trò chuyện & Hỏi đáp thông minh với AI</title>
-  <meta name="description" content="Trải nghiệm Chatbot AI thông minh, sẵn sàng trò chuyện, giải đáp thắc mắc và hỗ trợ bạn mọi lúc. Bắt đầu cuộc hội thoại với trí tuệ nhân tạo ngay hôm nay.">
-  <meta name="keywords" content="chatbot, ai, trí tuệ nhân tạo, gemma, google ai, hỏi đáp, trò chuyện, chatbot tiếng việt">
+  <meta name="description"
+    content="Trải nghiệm Chatbot AI thông minh, sẵn sàng trò chuyện, giải đáp thắc mắc và hỗ trợ bạn mọi lúc. Bắt đầu cuộc hội thoại với trí tuệ nhân tạo ngay hôm nay.">
+  <meta name="keywords"
+    content="chatbot, ai, trí tuệ nhân tạo, gemma, google ai, hỏi đáp, trò chuyện, chatbot tiếng việt">
   <meta name="author" content="NatswarChuan">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://natswarchuan.github.io/Chatbot-AI/">
@@ -15,15 +17,17 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://natswarchuan.github.io/Chatbot-AI/">
   <meta property="og:title" content="Chatbot AI: Trò chuyện & Hỏi đáp thông minh">
-  <meta property="og:description" content="Trải nghiệm Chatbot AI thông minh, sẵn sàng trò chuyện, giải đáp thắc mắc và hỗ trợ bạn mọi lúc.">
+  <meta property="og:description"
+    content="Trải nghiệm Chatbot AI thông minh, sẵn sàng trò chuyện, giải đáp thắc mắc và hỗ trợ bạn mọi lúc.">
   <meta property="og:image" content="https://natswarchuan.github.io/Chatbot-AI/logo.jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  
+
   <meta property="twitter:card" content="summary_large_image">
   <meta property="twitter:url" content="https://natswarchuan.github.io/Chatbot-AI/">
   <meta property="twitter:title" content="Chatbot AI: Trò chuyện & Hỏi đáp thông minh">
-  <meta property="twitter:description" content="Trải nghiệm Chatbot AI thông minh, sẵn sàng trò chuyện, giải đáp thắc mắc và hỗ trợ bạn mọi lúc.">
+  <meta property="twitter:description"
+    content="Trải nghiệm Chatbot AI thông minh, sẵn sàng trò chuyện, giải đáp thắc mắc và hỗ trợ bạn mọi lúc.">
   <meta property="twitter:image" content="https://natswarchuan.github.io/Chatbot-AI/logo.jpeg">
 
   <link rel="icon" href="https://natswarchuan.github.io/Chatbot-AI/favicon.ico" type="image/x-icon">
@@ -33,7 +37,29 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code&family=Inter:wght@400;600&display=swap"
+    rel="stylesheet">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Chatbot AI",
+  "description": "Trải nghiệm Chatbot AI thông minh, sẵn sàng trò chuyện, giải đáp thắc mắc và hỗ trợ bạn mọi lúc. Bắt đầu cuộc hội thoại với trí tuệ nhân tạo ngay hôm nay.",
+  "url": "https://natswarchuan.github.io/Chatbot-AI/",
+  "image": "https://natswarchuan.github.io/Chatbot-AI/logo.jpeg",
+  "author": {
+    "@type": "Person",
+    "name": "NatswarChuan"
+  },
+  "applicationCategory": "CommunicationApplication",
+  "operatingSystem": "Web-based",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "VND"
+  }
+}
+</script>
 </head>
 
 <body>
@@ -42,7 +68,8 @@
       <h1 class="text-lg font-semibold" data-translation-key="chatTitle">Chatbot AI</h1>
       <nav class="settings-menu">
         <button id="settingsMenuButton" class="theme-toggle-button" title="Cài đặt">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="1"></circle>
             <circle cx="12" cy="5" r="1"></circle>
             <circle cx="12" cy="19" r="1"></circle>
@@ -51,24 +78,40 @@
         <div id="settingsDropdown" class="dropdown-menu hidden">
           <button id="menuThemeToggle">
             <div class="icon-container">
-              <svg id="menuThemeIconLight" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+              <svg id="menuThemeIconLight" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
               </svg>
-              <svg id="menuThemeIconDark" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden">
+              <svg id="menuThemeIconDark" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" class="hidden">
                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
               </svg>
             </div>
             <span data-translation-key="menuChangeTheme">Đổi giao diện</span>
           </button>
           <button id="menuApiKey">
-            <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-container">
-               <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+            <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="icon-container">
+              <path
+                d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
             </svg>
             <span data-translation-key="menuSetApiKey">Nhập API Key</span>
           </button>
           <button id="menuLanguageToggle">
             <span class="icon-container" aria-hidden="true">🌐</span>
-            <span data-translation-key="menuLanguage">Ngôn ngữ:</span>&nbsp;<strong id="menuLanguageIndicator">VI</strong>
+            <span data-translation-key="menuLanguage">Ngôn ngữ:</span>&nbsp;<strong
+              id="menuLanguageIndicator">VI</strong>
           </button>
         </div>
       </nav>
@@ -78,11 +121,13 @@
     <footer class="chat-input-area">
       <div class="chat-input-main">
         <div id="chatInputWrapper" class="chat-input-wrapper">
-          <textarea id="chatInput" class="chat-input" placeholder="Nhắn tin cho AI..." data-translation-key="chatInputPlaceholder" autocomplete="off" rows="1"></textarea>
+          <textarea id="chatInput" class="chat-input" placeholder="Nhắn tin cho AI..."
+            data-translation-key="chatInputPlaceholder" autocomplete="off" rows="1"></textarea>
           <div id="charCounter" class="char-counter">0/2000</div>
         </div>
         <button id="stopGeneratingButton" class="send-button hidden" aria-label="Ngừng trả lời">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
           </svg>
         </button>
@@ -97,28 +142,29 @@
       <div id="inputErrorMessage" class="input-error-message" role="alert" style="display: none;"></div>
     </footer>
   </article>
-  
+
   <div id="apiKeyModal"
     class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center hidden"
     style="pointer-events: none; z-index: 1050;" role="dialog" aria-modal="true" aria-labelledby="apiKeyModalTitle">
     <div class="modal-content-box">
       <button id="closeApiKeyModalButton" class="modal-close-button" aria-label="Đóng modal">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
       </button>
-      <h2 id="apiKeyModalTitle" class="text-2xl font-semibold mb-4" data-translation-key="apiKeyModalTitle">Nhập API Key của Google AI</h2>
+      <h2 id="apiKeyModalTitle" class="text-2xl font-semibold mb-4" data-translation-key="apiKeyModalTitle">Nhập API Key
+        của Google AI</h2>
       <p class="mb-6" data-translation-key="apiKeyModalDescription">
         Để sử dụng chatbot, bạn cần cung cấp API Key. Bạn có thể lấy API Key từ
         <a href="https://aistudio.google.com/app/apikey" target="_blank" class="font-medium">Google AI Studio</a>.
       </p>
-      <input type="password" id="apiKeyInput"
-        class="w-full p-3 border border-gray-300 rounded-md mb-6"
+      <input type="password" id="apiKeyInput" class="w-full p-3 border border-gray-300 rounded-md mb-6"
         placeholder="API Key của bạn" data-translation-key="apiKeyModalInputPlaceholder">
       <div class="flex justify-end">
-        <button id="saveApiKeyButton"
-          class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700" data-translation-key="apiKeyModalSaveButton">Lưu
+        <button id="saveApiKeyButton" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
+          data-translation-key="apiKeyModalSaveButton">Lưu
           Key</button>
       </div>
     </div>
@@ -126,6 +172,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-  <script type="module" src="./js/main.js"></script> 
+  <script type="module" src="./js/main.js"></script>
 </body>
+
 </html>
