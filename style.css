@@ -424,3 +424,103 @@ body {
 .dark-theme .input-error-message::before {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23f87171'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z'/%3E%3C/svg%3E");
 }
+
+
+.modal-content-box {
+
+  transition: background-color 0.3s;
+}
+
+.modal-content-box h2 {
+  color: #1f2937;
+}
+
+.modal-content-box p {
+  color: #4b5563;
+}
+
+.modal-content-box a {
+  color: #2563eb;
+  transition: color 0.2s;
+}
+
+.modal-content-box a:hover {
+  text-decoration: underline;
+  color: #1d4ed8;
+}
+
+.modal-close-button {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: transparent;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: #6b7280;
+  border-radius: 50%;
+  transition: background-color 0.2s, color 0.2s;
+  line-height: 0;
+}
+
+.modal-close-button:hover {
+  background-color: #f3f4f6;
+  color: #1f2937;
+}
+
+.modal-close-button svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+
+.dark-theme .modal-content-box {
+  background-color: var(--background-secondary);
+}
+
+.dark-theme .modal-content-box h2 {
+  color: var(--text-primary);
+}
+
+.dark-theme .modal-content-box p {
+  color: var(--text-secondary);
+}
+
+.dark-theme .modal-content-box a {
+  color: #60a5fa;
+}
+
+.dark-theme .modal-content-box a:hover {
+  color: #93c5fd;
+}
+
+.dark-theme .modal-content-box input[type="password"] {
+  background-color: var(--background-primary);
+  color: var(--text-primary);
+  border-color: #4b5563;
+}
+
+.dark-theme .modal-content-box input[type="password"]::placeholder {
+  color: #9ca3af;
+}
+
+.dark-theme .modal-close-button {
+  color: #9ca3af;
+}
+
+.dark-theme .modal-close-button:hover {
+  background-color: #374151;
+  color: #f3f4f6;
+}
+
+
+.dark-theme .modal-content-box #saveApiKeyButton {
+
+
+
+  background-color: #2563eb;
+}
+
+.dark-theme .modal-content-box #saveApiKeyButton:hover {
+  background-color: #1d4ed8;
+}

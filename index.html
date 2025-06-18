@@ -34,6 +34,7 @@
   <link rel="apple-touch-icon" href="https://natswarchuan.github.io/Chatbot-AI/logo.jpeg">
 
   <!-- Styles and Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="./style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -46,25 +47,30 @@
   <div class="chat-container">
     <div class="chat-header">
       <h1 class="text-lg font-semibold">Chatbot AI</h1>
-      <button id="themeToggle" class="theme-toggle-button" title="Chuyển đổi theme">
-        <svg id="themeIconLight" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="5"></circle>
-          <line x1="12" y1="1" x2="12" y2="3"></line>
-          <line x1="12" y1="21" x2="12" y2="23"></line>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-          <line x1="1" y1="12" x2="3" y2="12"></line>
-          <line x1="21" y1="12" x2="23" y2="12"></line>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-        </svg>
-        <svg id="themeIconDark" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-          style="display:none;">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-        </svg>
-      </button>
+      <div class="flex items-center gap-2">
+        <button id="showApiKeyModalButton" class="theme-toggle-button" title="Nhập API Key">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+        </button>
+        <button id="themeToggle" class="theme-toggle-button" title="Chuyển đổi theme">
+          <svg id="themeIconLight" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg id="themeIconDark" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            style="display:none;">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </div>
     </div>
     <div class="chat-messages" id="chatMessages">
     </div>
@@ -94,12 +100,17 @@
   <div id="apiKeyModal"
     class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center"
     style="display: none; pointer-events: none;">
-    <div class="bg-white p-8 rounded-lg shadow-xl w-11/12 max-w-md mx-auto" style="pointer-events: auto;">
-      <h2 class="text-2xl font-semibold mb-4 text-gray-800">Nhập API Key của Google AI</h2>
-      <p class="mb-6 text-gray-600">
+    <div class="modal-content-box bg-white p-8 rounded-lg shadow-xl w-11/12 max-w-md mx-auto relative" style="pointer-events: auto;">
+      <button id="closeApiKeyModalButton" class="modal-close-button" aria-label="Đóng modal">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <h2 class="text-2xl font-semibold mb-4">Nhập API Key của Google AI</h2>
+      <p class="mb-6">
         Để sử dụng chatbot, bạn cần cung cấp API Key. Bạn có thể lấy API Key từ
-        <a href="https://aistudio.google.com/app/apikey" target="_blank"
-          class="text-blue-600 hover:underline font-medium">Google AI Studio</a>.
+        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="font-medium">Google AI Studio</a>.
       </p>
       <input type="password" id="apiKeyInput"
         class="w-full p-3 border border-gray-300 rounded-md mb-6 focus:ring-2 focus:ring-blue-500"

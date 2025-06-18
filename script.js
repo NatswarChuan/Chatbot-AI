@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+
   const themeToggleButton = document.getElementById('themeToggle');
   const themeIconLight = document.getElementById('themeIconLight');
   const themeIconDark = document.getElementById('themeIconDark');
@@ -12,11 +13,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const inputErrorMessage = document.getElementById('inputErrorMessage');
   const charCounter = document.getElementById('charCounter');
   const saveApiKeyButton = document.getElementById('saveApiKeyButton');
+  const closeApiKeyModalButton = document.getElementById('closeApiKeyModalButton');
+
+  const showApiKeyModalButton = document.getElementById('showApiKeyModalButton');
+
 
   const API_ENDPOINT_BASE = 'https://generativelanguage.googleapis.com/v1beta/models/';
-  const AI_MODEL_NAME = 'gemma-3n-e4b-it';
-
+  const AI_MODEL_NAME = 'gemini-1.5-flash-latest';
   const SUB_PROMPT = `\n***LƯU Ý QUAN TRỌNG***: đảm bảo gói gọn tất cả câu trả lời từ bây giờ trong 8192 token.`;
+
 
   let currentApiKey = null;
   const MINUTE_MESSAGE_LIMIT = 30;
@@ -88,16 +93,30 @@ document.addEventListener('DOMContentLoaded', () => {
     apiKeyModal.style.display = 'flex';
     apiKeyModal.style.pointerEvents = 'auto';
     apiKeyInput.focus();
+    document.addEventListener('keydown', handleModalEscapeKey);
   }
 
   /**
    * Ẩn modal nhập API key.
    */
   function hideApiKeyModal() {
+    if (apiKeyModal.style.display === 'none') return;
     apiKeyModal.style.display = 'none';
     apiKeyModal.style.pointerEvents = 'none';
+    document.removeEventListener('keydown', handleModalEscapeKey);
   }
 
+  /**
+   * Xử lý sự kiện nhấn phím Escape để đóng modal.
+   * @param {KeyboardEvent} event
+   */
+  function handleModalEscapeKey(event) {
+    if (event.key === 'Escape') {
+      if (apiKeyModal.style.display === 'flex') {
+        hideApiKeyModal();
+      }
+    }
+  }
   /**
    * Hiển thị thông báo lỗi dưới ô nhập liệu.
    * @param {string} message - Nội dung thông báo lỗi.
@@ -119,7 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /**
    * Kiểm tra giới hạn tin nhắn, độ dài văn bản và trạng thái của nút gửi/ô nhập liệu.
-   * Cũng quản lý việc hiển thị/xóa các lỗi liên quan đến trạng thái input.
    */
   function checkRateLimitsAndToggleButtonState() {
     const currentTime = Date.now();
@@ -127,11 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const maxChars = PROMPT_CHARACTER_LIMIT;
 
     charCounter.textContent = `${currentLength}/${maxChars}`;
-    if (currentLength > maxChars) {
-      charCounter.classList.add('error');
-    } else {
-      charCounter.classList.remove('error');
-    }
+    charCounter.classList.toggle('error', currentLength > maxChars);
 
     if (currentTime >= messageLimits.dailyResetTimestamp) {
       messageLimits.dailyTimestamps = [];
@@ -143,29 +157,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const dailyCount = messageLimits.dailyTimestamps.length;
     const isInputEmpty = chatInput.value.trim() === '';
 
-    let sendButtonDisabled = isInputEmpty ||
-      currentLength > maxChars ||
-      minuteCount >= MINUTE_MESSAGE_LIMIT ||
-      dailyCount >= DAILY_MESSAGE_LIMIT ||
-      !currentApiKey;
+    const isRateLimited = minuteCount >= MINUTE_MESSAGE_LIMIT || dailyCount >= DAILY_MESSAGE_LIMIT;
 
-    let chatInputDisabled = !currentApiKey ||
-      minuteCount >= MINUTE_MESSAGE_LIMIT ||
-      dailyCount >= DAILY_MESSAGE_LIMIT;
-
-    sendButton.disabled = sendButtonDisabled;
-    chatInput.disabled = chatInputDisabled;
-
+    sendButton.disabled = isInputEmpty || currentLength > maxChars || isRateLimited || !currentApiKey;
+    chatInput.disabled = isRateLimited || !currentApiKey;
 
     if (!currentApiKey) {
       showInputError("Vui lòng cung cấp API Key để gửi tin nhắn.");
-    } else if (minuteCount >= MINUTE_MESSAGE_LIMIT || dailyCount >= DAILY_MESSAGE_LIMIT) {
+    } else if (isRateLimited) {
       showInputError("Bạn đã đạt giới hạn gửi tin nhắn. Vui lòng thử lại sau.");
     } else if (currentLength <= maxChars) {
       clearInputError();
     }
-
-
 
     adjustTextareaHeight();
   }
@@ -186,34 +189,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /**
    * Xử lý sự kiện sao chép mã từ một khối mã.
-   * @param {Event} event - Đối tượng sự kiện click.
-   * @param {HTMLElement} codeElement - Phần tử `<code>` chứa mã cần sao chép.
-   * @param {HTMLButtonElement} buttonElement - Nút "Copy" được nhấp.
    */
   function handleCopyCode(event, codeElement, buttonElement) {
     event.stopPropagation();
     const codeToCopy = codeElement.innerText;
-    const textArea = document.createElement('textarea');
-    textArea.value = codeToCopy;
-    document.body.appendChild(textArea);
-    textArea.select();
-    try {
-      document.execCommand('copy');
+    navigator.clipboard.writeText(codeToCopy).then(() => {
       buttonElement.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg><span>Đã chép!</span>`;
-    } catch (err) {
+      setTimeout(() => {
+        buttonElement.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg><span>Copy</span>`;
+      }, 2000);
+    }).catch(err => {
       console.error('Không thể sao chép: ', err);
       buttonElement.innerText = 'Lỗi';
       alert(`Không thể sao chép: ${err.message}`);
-    }
-    document.body.removeChild(textArea);
-    setTimeout(() => {
-      buttonElement.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg><span>Copy</span>`;
-    }, 2000);
+    });
   }
 
   /**
    * Thêm nút "Copy" vào các khối mã.
-   * @param {HTMLElement} container - Phần tử DOM chứa các khối mã cần thêm nút "Copy".
    */
   function addCopyButtons(container) {
     const codeBlocks = container.querySelectorAll('pre');
@@ -233,8 +226,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /**
    * Thêm tin nhắn vào giao diện chat.
-   * @param {string} message - Nội dung của tin nhắn.
-   * @param {'user' | 'ai'} sender - Người gửi tin nhắn ('user' hoặc 'ai').
    */
   function addMessage(message, sender) {
     const messageElement = document.createElement('div');
@@ -242,7 +233,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const contentWrapper = document.createElement('div');
     contentWrapper.classList.add('message-content');
-    messageElement.appendChild(contentWrapper);
 
     if (sender === 'user') {
       contentWrapper.textContent = message;
@@ -251,13 +241,13 @@ document.addEventListener('DOMContentLoaded', () => {
       addCopyButtons(contentWrapper);
     }
 
+    messageElement.appendChild(contentWrapper);
     chatMessages.appendChild(messageElement);
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 
   /**
    * Gửi yêu cầu đến API của Google AI và xử lý phản hồi.
-   * @param {string} prompt - Nội dung tin nhắn từ người dùng để gửi đến AI.
    */
   async function getAIResponse(prompt) {
     if (!currentApiKey) {
@@ -268,11 +258,9 @@ document.addEventListener('DOMContentLoaded', () => {
     loadingIndicator.style.display = 'flex';
     sendButton.disabled = true;
 
-    let finalPrompt = prompt;
-    const maxChars = PROMPT_CHARACTER_LIMIT;
-    if (prompt.length > maxChars) {
+    if (prompt.length > PROMPT_CHARACTER_LIMIT) {
       loadingIndicator.style.display = 'none';
-      addMessage(`**Lỗi:** Nội dung tin nhắn quá dài (tối đa ${maxChars} ký tự). Vui lòng rút ngắn.`, 'ai');
+      addMessage(`**Lỗi:** Nội dung tin nhắn quá dài (tối đa ${PROMPT_CHARACTER_LIMIT} ký tự). Vui lòng rút ngắn.`, 'ai');
       checkRateLimitsAndToggleButtonState();
       return;
     }
@@ -282,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
         method: 'POST',
         signal: AbortSignal.timeout(30000),
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: finalPrompt }] }] })
+        body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }] })
       });
 
       if (!response.ok) {
@@ -290,12 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error(errorData?.error?.message || `Lỗi API: ${response.status} ${response.statusText}`);
       }
 
-      const result = await response.json().catch(err => {
-        console.error('Lỗi phân tích JSON:', err);
-        const errorMessage = `Lỗi phân tích phản hồi từ AI: ${err.message}`;
-        alert(errorMessage);
-        throw new Error(errorMessage);
-      });
+      const result = await response.json();
       const aiText = result.candidates?.[0]?.content?.parts?.[0]?.text;
 
       if (aiText) {
@@ -316,69 +299,22 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /**
-   * Gửi một yêu cầu "ping" ban đầu đến AI để khởi động hoặc kiểm tra.
-   * Yêu cầu này không hiển thị trên giao diện người dùng.
-   */
-  async function sendInitialPingToAI() {
-    if (!currentApiKey) {
-      console.warn("Không thể gửi ping ban đầu: API Key chưa được cung cấp.");
-      return;
-    }
-
-    const initialPrompt = SUB_PROMPT;
-
-    try {
-      const response = await fetch(`${API_ENDPOINT_BASE}${AI_MODEL_NAME}:generateContent?key=${currentApiKey}`, {
-        method: 'POST',
-        signal: AbortSignal.timeout(15000),
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: initialPrompt }] }] })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: { message: 'Không thể phân tích phản hồi lỗi từ API ping.' } }));
-        console.warn(`Lỗi khi gửi ping ban đầu đến AI: ${errorData?.error?.message || response.status}`);
-        return;
-      }
-      console.log("Ping ban đầu đến AI thành công.");
-    } catch (error) {
-      console.warn(`Lỗi khi gửi ping ban đầu đến AI: ${error.message}`);
-    }
-  }
-
-  /**
    * Xử lý hành động gửi tin nhắn từ người dùng.
    */
   function handleSendMessage() {
     const message = chatInput.value.trim();
-    const currentInputLength = chatInput.value.length;
-    const maxChars = PROMPT_CHARACTER_LIMIT;
+    if (!message || sendButton.disabled) return;
 
-    if (message && !sendButton.disabled) {
-      clearInputError();
-      addMessage(message, 'user');
-      const now = Date.now();
-      messageLimits.minuteTimestamps.push(now);
-      messageLimits.dailyTimestamps.push(now);
-      localStorage.setItem('messageLimits', JSON.stringify(messageLimits));
-      getAIResponse(message);
-      chatInput.value = '';
-      charCounter.textContent = `0/${PROMPT_CHARACTER_LIMIT}`;
-    } else if (!message) {
-      showInputError("Nội dung tin nhắn không được để trống.");
-    } else if (sendButton.disabled) {
+    clearInputError();
+    addMessage(message, 'user');
 
-      if (!currentApiKey) {
-        showInputError("Vui lòng cung cấp API Key để gửi tin nhắn.");
-        showApiKeyModal();
-      } else if (currentInputLength > maxChars) {
-        showInputError(`Nội dung tin nhắn quá dài. Giới hạn cho phép là ${maxChars} ký tự.`);
-      } else if (messageLimits.minuteTimestamps.length >= MINUTE_MESSAGE_LIMIT || messageLimits.dailyTimestamps.length >= DAILY_MESSAGE_LIMIT) {
-        showInputError("Bạn đã đạt giới hạn gửi tin nhắn. Vui lòng thử lại sau.");
-      } else {
-        showInputError("Không thể gửi tin nhắn. Vui lòng kiểm tra lại.");
-      }
-    }
+    const now = Date.now();
+    messageLimits.minuteTimestamps.push(now);
+    messageLimits.dailyTimestamps.push(now);
+    localStorage.setItem('messageLimits', JSON.stringify(messageLimits));
+
+    getAIResponse(message);
+    chatInput.value = '';
     checkRateLimitsAndToggleButtonState();
   }
 
@@ -395,7 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
       addMessage("Đã lưu API Key. Bây giờ bạn có thể bắt đầu chat!", 'ai');
       apiKeyInput.value = '';
     } else {
-      showInputError("Vui lòng nhập API Key hợp lệ vào ô bên trên.");
+      alert("Vui lòng nhập API Key hợp lệ.");
     }
     checkRateLimitsAndToggleButtonState();
   }
@@ -406,24 +342,12 @@ document.addEventListener('DOMContentLoaded', () => {
   function initializeApiKey() {
     currentApiKey = localStorage.getItem('googleApiKey');
     if (!currentApiKey) {
-      addMessage("Vui lòng cung cấp API Key của Google AI để tiếp tục.", 'ai');
+      addMessage("Xin chào! Vui lòng cung cấp API Key của Google AI để bắt đầu.", 'ai');
       showApiKeyModal();
+    } else {
+      addMessage("Xin chào! Tôi có thể giúp gì cho bạn?", 'ai');
     }
     checkRateLimitsAndToggleButtonState();
-  }
-
-  /**
-   * Xử lý sự kiện nhấn phím trên ô nhập liệu chat.
-   * @param {KeyboardEvent} event - Đối tượng sự kiện phím.
-   */
-  function handleChatInputKeypress(event) {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      handleSendMessage();
-    } else {
-
-
-    }
   }
 
   /**
@@ -436,19 +360,30 @@ document.addEventListener('DOMContentLoaded', () => {
     chatInput.style.height = `${newHeight}px`;
   }
 
+
   themeToggleButton.addEventListener('click', toggleTheme);
   sendButton.addEventListener('click', handleSendMessage);
-  chatInput.addEventListener('keypress', handleChatInputKeypress);
-  chatInput.addEventListener('input', () => {
-    checkRateLimitsAndToggleButtonState();
+  chatInput.addEventListener('keypress', (event) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      handleSendMessage();
+    }
   });
+  chatInput.addEventListener('input', checkRateLimitsAndToggleButtonState);
   saveApiKeyButton.addEventListener('click', handleSaveApiKey);
+  closeApiKeyModalButton.addEventListener('click', hideApiKeyModal);
+
+
+  showApiKeyModalButton.addEventListener('click', showApiKeyModal);
+
+  apiKeyModal.addEventListener('click', (event) => {
+    if (event.target === apiKeyModal) {
+      hideApiKeyModal();
+    }
+  });
+
 
   initializeTheme();
   loadMessageLimits();
   initializeApiKey();
-
-  checkRateLimitsAndToggleButtonState();
-  sendInitialPingToAI();
-  addMessage("Xin chào! Tôi có thể giúp gì cho bạn?", 'ai');
 });
