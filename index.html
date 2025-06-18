@@ -214,11 +214,38 @@
     </div>
   </div>
 
+  <!-- Modal nhập API Key -->
+  <div id="apiKeyModal"
+    class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center"
+    style="display: none;">
+    <div class="bg-white p-6 sm:p-8 rounded-lg shadow-xl w-11/12 sm:w-full max-w-md mx-auto">
+      <h2 class="text-xl sm:text-2xl font-semibold mb-4 text-gray-800">Nhập API Key của Google AI</h2>
+      <p class="mb-4 text-sm text-gray-600">
+        Bạn cần cung cấp API Key để sử dụng dịch vụ. Bạn có thể lấy API Key từ
+        <a href="https://aistudio.google.com/app/apikey" target="_blank"
+          class="text-indigo-600 hover:text-indigo-800 hover:underline font-medium">Google AI Studio</a>.
+      </p>
+      <input type="password" id="apiKeyInput"
+        class="w-full p-3 border border-gray-300 rounded-md mb-4 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+        placeholder="API Key của bạn">
+      <div class="flex justify-end">
+        <button id="saveApiKeyButton"
+          class="bg-indigo-600 text-white px-6 py-2.5 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-150 ease-in-out">Lưu
+          Key</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module">
     const chatInput = document.getElementById('chatInput');
     const sendButton = document.getElementById('sendButton');
     const chatMessages = document.getElementById('chatMessages');
     const loadingIndicator = document.getElementById('loadingIndicator');
+
+    const apiKeyModal = document.getElementById('apiKeyModal');
+    const apiKeyInput = document.getElementById('apiKeyInput');
+    const saveApiKeyButton = document.getElementById('saveApiKeyButton');
+    let currentApiKey = null;
 
     const MINUTE_MESSAGE_LIMIT = 30;
     const MINUTE_TIME_WINDOW = 60 * 1000;
@@ -227,6 +254,48 @@
     const DAILY_MESSAGE_LIMIT = 14400;
     const DAILY_TIME_WINDOW = 24 * 60 * 60 * 1000;
     let dailyMessageTimestamps = [];
+
+    function showApiKeyModal() {
+      apiKeyModal.style.display = 'flex';
+      apiKeyInput.focus();
+    }
+
+    function hideApiKeyModal() {
+      apiKeyModal.style.display = 'none';
+    }
+
+    function checkRateLimitsAndToggleButtonState() {
+      const currentTime = Date.now();
+      let minuteLimitReached = false;
+      let dailyLimitReached = false;
+
+      const tempMinuteTimestamps = minuteMessageTimestamps.filter(timestamp => currentTime - timestamp < MINUTE_TIME_WINDOW);
+      if (tempMinuteTimestamps.length >= MINUTE_MESSAGE_LIMIT) {
+        minuteLimitReached = true;
+      }
+
+      const tempDailyTimestamps = dailyMessageTimestamps.filter(timestamp => currentTime - timestamp < DAILY_TIME_WINDOW);
+      if (tempDailyTimestamps.length >= DAILY_MESSAGE_LIMIT) {
+        dailyLimitReached = true;
+      }
+
+      if (minuteLimitReached || dailyLimitReached || !currentApiKey) {
+        sendButton.disabled = true;
+        chatInput.disabled = !currentApiKey || minuteLimitReached || dailyLimitReached;
+      } else {
+        sendButton.disabled = false;
+        chatInput.disabled = false;
+      }
+    }
+
+    function loadAndPromptApiKey() {
+      currentApiKey = localStorage.getItem('googleApiKey');
+      if (!currentApiKey) {
+        addMessage("Vui lòng cung cấp API Key của Google AI để tiếp tục sử dụng chatbot.", 'ai');
+        showApiKeyModal();
+      }
+      checkRateLimitsAndToggleButtonState();
+    }
 
     function formatAIResponseToHTML(text) {
       let html = text;
@@ -305,6 +374,14 @@
 
 
     async function getAIResponse(prompt) {
+      if (!currentApiKey) {
+        addMessage("API Key không hợp lệ hoặc chưa được cung cấp. Vui lòng kiểm tra và nhập lại.", 'ai');
+        showApiKeyModal();
+        checkRateLimitsAndToggleButtonState();
+        loadingIndicator.style.display = 'none';
+        return;
+      }
+
       loadingIndicator.style.display = 'flex';
       try {
         let chatHistory = [];
@@ -315,8 +392,8 @@
         };
 
 
-        const apiKey = "AIzaSyAXFsfBoZFMqiGEubl_xPlrl77KVGFwA94";
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemma-3-1b-it:generateContent?key=${apiKey}`;
+
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemma-3-1b-it:generateContent?key=${currentApiKey}`;
 
         const response = await fetch(apiUrl, {
           method: 'POST',
@@ -324,15 +401,37 @@
           body: JSON.stringify(payload)
         });
 
-        const result = await response.json();
+        if (!response.ok) {
+          let errorData;
+          try {
+            errorData = await response.json();
+          } catch (e) {
+            throw new Error(`Lỗi API: ${response.status} ${response.statusText}. Không thể đọc chi tiết lỗi.`);
+          }
 
+          if (response.status === 400 && errorData.error && errorData.error.message &&
+            (errorData.error.message.toLowerCase().includes("api key not valid") ||
+              errorData.error.message.toLowerCase().includes("invalid api key") ||
+              errorData.error.message.toLowerCase().includes("api_key_invalid"))) {
+            localStorage.removeItem('googleApiKey');
+            currentApiKey = null;
+            addMessage("API Key không hợp lệ hoặc đã hết hạn. Vui lòng nhập lại.", 'ai');
+            loadAndPromptApiKey();
+          } else {
+            const detailMessage = errorData.error && errorData.error.message ? errorData.error.message : `Mã lỗi ${response.status}`;
+            addMessage(`Lỗi từ AI: ${detailMessage}. Vui lòng thử lại.`, 'ai');
+          }
+          return;
+        }
+
+        const result = await response.json();
         if (result.candidates && result.candidates.length > 0 &&
           result.candidates[0].content && result.candidates[0].content.parts &&
           result.candidates[0].content.parts.length > 0) {
           const text = result.candidates[0].content.parts[0].text;
           addMessage(text, 'ai');
         } else {
-          addMessage("Xin lỗi, tôi không thể tạo ra phản hồi vào lúc này. Vui lòng thử lại.", 'ai');
+          addMessage("Xin lỗi, AI không thể tạo ra phản hồi vào lúc này. Cấu trúc phản hồi không mong đợi.", 'ai');
           console.error("Lỗi: Cấu trúc phản hồi từ API không mong đợi hoặc nội dung bị thiếu.", result);
         }
       } catch (error) {
@@ -345,25 +444,31 @@
 
 
     sendButton.addEventListener('click', () => {
-      const currentTime = Date.now();
+      if (!currentApiKey) {
+        showApiKeyModal();
+        addMessage("Vui lòng cung cấp API Key trước khi gửi tin nhắn.", 'ai');
+        return;
+      }
 
+      const currentTime = Date.now();
 
       minuteMessageTimestamps = minuteMessageTimestamps.filter(timestamp => currentTime - timestamp < MINUTE_TIME_WINDOW);
       if (minuteMessageTimestamps.length >= MINUTE_MESSAGE_LIMIT) {
         addMessage("Bạn đã gửi quá nhiều tin nhắn. Vui lòng thử lại sau 1 phút.", 'ai');
-
         sendButton.disabled = true;
-        setTimeout(() => sendButton.disabled = false, MINUTE_TIME_WINDOW - (currentTime - minuteMessageTimestamps[0]));
+        setTimeout(() => {
+          checkRateLimitsAndToggleButtonState();
+        }, Math.max(0, MINUTE_TIME_WINDOW - (currentTime - minuteMessageTimestamps[0])) + 100);
         return;
       }
-
 
       dailyMessageTimestamps = dailyMessageTimestamps.filter(timestamp => currentTime - timestamp < DAILY_TIME_WINDOW);
       if (dailyMessageTimestamps.length >= DAILY_MESSAGE_LIMIT) {
         addMessage("Bạn đã đạt giới hạn tin nhắn hàng ngày. Vui lòng thử lại sau.", 'ai');
-
         sendButton.disabled = true;
-        setTimeout(() => sendButton.disabled = false, DAILY_TIME_WINDOW - (currentTime - dailyMessageTimestamps[0]));
+        setTimeout(() => {
+          checkRateLimitsAndToggleButtonState();
+        }, Math.max(0, DAILY_TIME_WINDOW - (currentTime - dailyMessageTimestamps[0])) + 100);
         return;
       }
 
@@ -374,6 +479,7 @@
         dailyMessageTimestamps.push(currentTime);
         getAIResponse(message);
         chatInput.value = '';
+        checkRateLimitsAndToggleButtonState();
       }
     });
 
@@ -383,6 +489,22 @@
         sendButton.click();
       }
     });
+
+    saveApiKeyButton.addEventListener('click', () => {
+      const key = apiKeyInput.value.trim();
+      if (key) {
+        localStorage.setItem('googleApiKey', key);
+        currentApiKey = key;
+        hideApiKeyModal();
+        addMessage("Đã lưu API Key. Bây giờ bạn có thể bắt đầu chat!", 'ai');
+        apiKeyInput.value = '';
+      } else {
+        alert("Vui lòng nhập API Key hợp lệ.");
+      }
+      checkRateLimitsAndToggleButtonState();
+    });
+
+    loadAndPromptApiKey(); 
   </script>
 </body>
 
