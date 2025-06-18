@@ -1,0 +1,80 @@
+.theme-toggle-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  color: var(--theme-toggle-icon-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-toggle-button:hover {
+  opacity: 0.7;
+}
+
+.send-button {
+  margin-left: 0.75rem;
+  padding: 0.6rem;
+  background: var(--accent-primary);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s, background 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.send-button:hover {
+  opacity: 0.85;
+}
+
+.send-button:active {
+  transform: scale(0.95);
+}
+
+.send-button:disabled {
+  background: #a0aec0;
+  cursor: not-allowed;
+}
+
+.dark-theme .send-button:disabled {
+  background: #4a5568;
+}
+
+.copy-code-button {
+  position: absolute;
+  top: 0.5em;
+  right: 0.5em;
+  background-color: var(--background-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s, background-color 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  z-index: 1;
+}
+
+.ai-message pre:hover .copy-code-button {
+  opacity: 1;
+}
+
+.copy-code-button:hover {
+  background-color: #e2e8f0;
+}
+
+.dark-theme .copy-code-button:hover {
+  background-color: #4a5568;
+}
+
+.copy-code-button:active {
+  transform: scale(0.95);
+}

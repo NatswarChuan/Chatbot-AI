@@ -1,0 +1,12 @@
+@import url('./partials/_tailwind.css');
+@import url('./partials/_theme.css');
+@import url('./partials/_base.css');
+@import url('./partials/_layout.css');
+@import url('./partials/_messages.css');
+@import url('./partials/_input.css');
+@import url('./partials/_buttons.css');
+@import url('./partials/_code.css');
+@import url('./partials/_modal.css');
+@import url('./partials/_loader.css');
+@import url('./partials/_dropdown.css');
+@import url('./partials/_responsive.css');

@@ -1,0 +1,27 @@
+:root {
+  --background-primary: #ffffff;
+  --background-secondary: #f1f3f4;
+  --text-primary: #202124;
+  --text-secondary: #5f6368;
+  --border-color: #e0e0e0;
+  --theme-toggle-icon-color: #5f6368;
+  --accent-primary: #168AFE;
+  --user-message-background: #e7f1ff;
+  --user-message-text: #001c3d;
+  --code-bg: #f8f9fa;
+  --code-text: #202124;
+}
+
+.dark-theme {
+  --background-primary: #1e1f22;
+  --background-secondary: #2d2f34;
+  --text-primary: #e8eaed;
+  --text-secondary: #bdc1c6;
+  --border-color: #3c4043;
+  --theme-toggle-icon-color: #bdc1c6;
+  --accent-primary: linear-gradient(45deg, #9F33FE, #FF6071);
+  --user-message-background: #3a3048;
+  --user-message-text: #e8eaed;
+  --code-bg: #202124;
+  --code-text: #e8eaed;
+}
