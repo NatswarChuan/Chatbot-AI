@@ -1,511 +1,87 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chatbot Google AI</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f0f2f5;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-    }
+  <!-- SEO Tags -->
+  <title>Chatbot AI - Trò chuyện và Hỏi đáp</title>
+  <meta name="description" content="Chatbot AI thông minh, sẵn sàng trò chuyện, giải đáp thắc mắc và hỗ trợ bạn với nhiều chủ đề khác nhau.">
+  <meta name="keywords" content="chatbot, ai, trí tuệ nhân tạo, hỏi đáp, trò chuyện, gemma, google ai">
+  <meta name="author" content="NatswarChuan">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://natswarchuan.github.io/Chatbot-AI/">
 
-    .chat-container {
-      width: 100%;
-      max-width: 600px;
-      height: 80vh;
-      display: flex;
-      flex-direction: column;
-      background-color: #ffffff;
-      border-radius: 1.5rem;
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://natswarchuan.github.io/Chatbot-AI/">
+  <meta property="og:title" content="Chatbot AI - Trò chuyện và Hỏi đáp">
+  <meta property="og:description" content="Chatbot AI thông minh, sẵn sàng trò chuyện, giải đáp thắc mắc và hỗ trợ bạn với nhiều chủ đề khác nhau.">
+  <meta property="og:image" content="./logo.jpge">
 
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-      margin: 1rem;
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://natswarchuan.github.io/Chatbot-AI/">
+  <meta property="twitter:title" content="Chatbot AI - Trò chuyện và Hỏi đáp">
+  <meta property="twitter:description" content="Chatbot AI thông minh, sẵn sàng trò chuyện, giải đáp thắc mắc và hỗ trợ bạn với nhiều chủ đề khác nhau.">
+  <meta property="twitter:image" content="https://natswarchuan.github.io/Chatbot-AI/logo.jpge">
 
-    }
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="https://natswarchuan.github.io/Chatbot-AI/logo.jpeg">
 
-    .chat-header {
-      background-color: #4f46e5;
-
-      color: white;
-      padding: 1.5rem;
-
-      font-size: 1.5rem;
-
-      font-weight: 600;
-
-      text-align: center;
-      border-top-left-radius: 1.5rem;
-      border-top-right-radius: 1.5rem;
-    }
-
-    .chat-messages {
-      flex-grow: 1;
-      padding: 1.5rem;
-
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-
-    }
-
-    .message-bubble {
-      max-width: 80%;
-      padding: 0.75rem 1rem;
-
-      border-radius: 1.25rem;
-
-      word-wrap: break-word;
-    }
-
-    .user-message {
-      align-self: flex-end;
-      background-color: #e0f2fe;
-
-      color: #1a202c;
-
-      border-bottom-right-radius: 0.25rem;
-
-    }
-
-    .ai-message {
-      align-self: flex-start;
-      background-color: #f0f4f8;
-
-      color: #1a202c;
-
-      border-bottom-left-radius: 0.25rem;
-
-    }
-
-    .chat-input-area {
-      display: flex;
-      padding: 1rem;
-
-      border-top: 1px solid #e2e8f0;
-
-      background-color: #ffffff;
-      border-bottom-left-radius: 1.5rem;
-      border-bottom-right-radius: 1.5rem;
-    }
-
-    .chat-input {
-      flex-grow: 1;
-      padding: 0.75rem 1.25rem;
-
-      border: 1px solid #cbd5e0;
-
-      border-radius: 1.5rem;
-
-      outline: none;
-      font-size: 1rem;
-
-      transition: border-color 0.2s;
-    }
-
-    .chat-input:focus {
-      border-color: #4f46e5;
-
-      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
-
-    }
-
-    .send-button {
-      margin-left: 0.75rem;
-
-      padding: 0.75rem 1.5rem;
-
-      background-color: #4f46e5;
-
-      color: white;
-      border-radius: 1.5rem;
-
-      font-weight: 600;
-
-      cursor: pointer;
-      transition: background-color 0.2s, transform 0.1s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      white-space: nowrap;
-    }
-
-    .send-button:hover {
-      background-color: #4338ca;
-
-    }
-
-    .send-button:active {
-      transform: scale(0.98);
-    }
-
-    .loading-indicator {
-      display: none;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      font-style: italic;
-      color: #6b7280;
-
-    }
-
-    .loading-dot {
-      width: 0.5rem;
-      height: 0.5rem;
-      background-color: #4f46e5;
-      border-radius: 50%;
-      animation: bounce 1.4s infinite ease-in-out both;
-    }
-
-    .loading-dot:nth-child(1) {
-      animation-delay: -0.32s;
-    }
-
-    .loading-dot:nth-child(2) {
-      animation-delay: -0.16s;
-    }
-
-    @keyframes bounce {
-
-      0%,
-      80%,
-      100% {
-        transform: scale(0);
-      }
-
-      40% {
-        transform: scale(1.0);
-      }
-    }
-  </style>
+  <!-- Styles and Fonts -->
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 </head>
-
 <body>
   <div class="chat-container">
     <div class="chat-header">
-      Chatbot thông minh
+      <h1 class="text-lg font-semibold">Chatbot AI</h1>
+      <button id="themeToggle" class="theme-toggle-button" title="Chuyển đổi theme">
+        <svg id="themeIconLight" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+        <svg id="themeIconDark" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+      </button>
     </div>
     <div class="chat-messages" id="chatMessages">
-      <!-- Tin nhắn sẽ được thêm vào đây -->
-      <div class="message-bubble ai-message">Xin chào! Tôi có thể giúp gì cho bạn?</div>
+      <div class="message-bubble ai-message">
+        <div class="message-content">Xin chào! Tôi có thể giúp gì cho bạn?</div>
+      </div>
     </div>
     <div class="chat-input-area">
-      <input type="text" id="chatInput" class="chat-input" placeholder="Gõ tin nhắn của bạn..." autocomplete="off">
+      <input type="text" id="chatInput" class="chat-input" placeholder="Nhắn tin cho AI..." autocomplete="off">
       <button id="sendButton" class="send-button">
-        Gửi
-        <span class="ml-2">➡️</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-up">
+          <line x1="12" y1="19" x2="12" y2="5"></line>
+          <polyline points="5 12 12 5 19 12"></polyline>
+        </svg>
       </button>
     </div>
     <div class="loading-indicator" id="loadingIndicator">
-      Đang gõ
-      <span class="loading-dot"></span>
-      <span class="loading-dot"></span>
-      <span class="loading-dot"></span>
+      <div class="spinner"></div>
+      <span>AI đang trả lời...</span>
     </div>
   </div>
 
-  <!-- Modal nhập API Key -->
-  <div id="apiKeyModal"
-    class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center"
-    style="display: none;">
-    <div class="bg-white p-6 sm:p-8 rounded-lg shadow-xl w-11/12 sm:w-full max-w-md mx-auto">
-      <h2 class="text-xl sm:text-2xl font-semibold mb-4 text-gray-800">Nhập API Key của Google AI</h2>
-      <p class="mb-4 text-sm text-gray-600">
-        Bạn cần cung cấp API Key để sử dụng dịch vụ. Bạn có thể lấy API Key từ
-        <a href="https://aistudio.google.com/app/apikey" target="_blank"
-          class="text-indigo-600 hover:text-indigo-800 hover:underline font-medium">Google AI Studio</a>.
+  <div id="apiKeyModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center" style="display: none; pointer-events: none;">
+    <div class="bg-white p-8 rounded-lg shadow-xl w-11/12 max-w-md mx-auto" style="pointer-events: auto;">
+      <h2 class="text-2xl font-semibold mb-4 text-gray-800">Nhập API Key của Google AI</h2>
+      <p class="mb-6 text-gray-600">
+        Để sử dụng chatbot, bạn cần cung cấp API Key. Bạn có thể lấy API Key từ
+        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-blue-600 hover:underline font-medium">Google AI Studio</a>.
       </p>
-      <input type="password" id="apiKeyInput"
-        class="w-full p-3 border border-gray-300 rounded-md mb-4 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-        placeholder="API Key của bạn">
+      <input type="password" id="apiKeyInput" class="w-full p-3 border border-gray-300 rounded-md mb-6 focus:ring-2 focus:ring-blue-500" placeholder="API Key của bạn">
       <div class="flex justify-end">
-        <button id="saveApiKeyButton"
-          class="bg-indigo-600 text-white px-6 py-2.5 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-150 ease-in-out">Lưu
-          Key</button>
+        <button id="saveApiKeyButton" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Lưu Key</button>
       </div>
     </div>
   </div>
 
-  <script type="module">
-    const chatInput = document.getElementById('chatInput');
-    const sendButton = document.getElementById('sendButton');
-    const chatMessages = document.getElementById('chatMessages');
-    const loadingIndicator = document.getElementById('loadingIndicator');
-
-    const apiKeyModal = document.getElementById('apiKeyModal');
-    const apiKeyInput = document.getElementById('apiKeyInput');
-    const saveApiKeyButton = document.getElementById('saveApiKeyButton');
-    let currentApiKey = null;
-
-    const MINUTE_MESSAGE_LIMIT = 30;
-    const MINUTE_TIME_WINDOW = 60 * 1000;
-    let minuteMessageTimestamps = [];
-
-    const DAILY_MESSAGE_LIMIT = 14400;
-    const DAILY_TIME_WINDOW = 24 * 60 * 60 * 1000;
-    let dailyMessageTimestamps = [];
-
-    function showApiKeyModal() {
-      apiKeyModal.style.display = 'flex';
-      apiKeyInput.focus();
-    }
-
-    function hideApiKeyModal() {
-      apiKeyModal.style.display = 'none';
-    }
-
-    function checkRateLimitsAndToggleButtonState() {
-      const currentTime = Date.now();
-      let minuteLimitReached = false;
-      let dailyLimitReached = false;
-
-      const tempMinuteTimestamps = minuteMessageTimestamps.filter(timestamp => currentTime - timestamp < MINUTE_TIME_WINDOW);
-      if (tempMinuteTimestamps.length >= MINUTE_MESSAGE_LIMIT) {
-        minuteLimitReached = true;
-      }
-
-      const tempDailyTimestamps = dailyMessageTimestamps.filter(timestamp => currentTime - timestamp < DAILY_TIME_WINDOW);
-      if (tempDailyTimestamps.length >= DAILY_MESSAGE_LIMIT) {
-        dailyLimitReached = true;
-      }
-
-      if (minuteLimitReached || dailyLimitReached || !currentApiKey) {
-        sendButton.disabled = true;
-        chatInput.disabled = !currentApiKey || minuteLimitReached || dailyLimitReached;
-      } else {
-        sendButton.disabled = false;
-        chatInput.disabled = false;
-      }
-    }
-
-    function loadAndPromptApiKey() {
-      currentApiKey = localStorage.getItem('googleApiKey');
-      if (!currentApiKey) {
-        addMessage("Vui lòng cung cấp API Key của Google AI để tiếp tục sử dụng chatbot.", 'ai');
-        showApiKeyModal();
-      }
-      checkRateLimitsAndToggleButtonState();
-    }
-
-    function formatAIResponseToHTML(text) {
-      let html = text;
-
-      html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-
-      html = html.replace(/^\s*---\s*$/gm, '<hr>');
-
-      const lines = html.split('\n');
-      const result = [];
-      let inList = false;
-      let currentParagraphLines = [];
-
-      function flushParagraph() {
-        if (currentParagraphLines.length > 0) {
-          const paragraphText = currentParagraphLines.map(l => l.trim()).filter(l => l !== '').join('<br>');
-          if (paragraphText) {
-            result.push('<p>' + paragraphText + '</p>');
-          }
-          currentParagraphLines = [];
-        }
-      }
-
-      for (const line of lines) {
-        const trimmedLine = line.trim();
-
-        if (trimmedLine === '<hr>') {
-          flushParagraph();
-          if (inList) {
-            result.push('</ul>');
-            inList = false;
-          }
-          result.push(trimmedLine);
-        } else if (trimmedLine.startsWith('* ')) {
-          flushParagraph();
-          if (!inList) {
-            result.push('<ul>');
-            inList = true;
-          }
-          result.push('<li>' + trimmedLine.substring(1).trim() + '</li>');
-        } else {
-          if (inList && trimmedLine !== '') {
-            result.push('</ul>');
-            inList = false;
-          }
-          if (trimmedLine === '') {
-            flushParagraph();
-          } else {
-            currentParagraphLines.push(line);
-          }
-        }
-      }
-
-      flushParagraph();
-      if (inList) {
-        result.push('</ul>');
-      }
-
-      return result.join('\n');
-    }
-
-    function addMessage(message, sender) {
-      const messageElement = document.createElement('div');
-      messageElement.classList.add('message-bubble');
-      if (sender === 'user') {
-        messageElement.classList.add('user-message');
-        messageElement.textContent = message;
-      } else {
-        messageElement.classList.add('ai-message');
-        messageElement.innerHTML = formatAIResponseToHTML(message);
-      }
-      chatMessages.appendChild(messageElement);
-
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-
-
-    async function getAIResponse(prompt) {
-      if (!currentApiKey) {
-        addMessage("API Key không hợp lệ hoặc chưa được cung cấp. Vui lòng kiểm tra và nhập lại.", 'ai');
-        showApiKeyModal();
-        checkRateLimitsAndToggleButtonState();
-        loadingIndicator.style.display = 'none';
-        return;
-      }
-
-      loadingIndicator.style.display = 'flex';
-      try {
-        let chatHistory = [];
-        chatHistory.push({ role: "user", parts: [{ text: prompt }] });
-
-        const payload = {
-          contents: chatHistory,
-        };
-
-
-
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemma-3-1b-it:generateContent?key=${currentApiKey}`;
-
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        if (!response.ok) {
-          let errorData;
-          try {
-            errorData = await response.json();
-          } catch (e) {
-            throw new Error(`Lỗi API: ${response.status} ${response.statusText}. Không thể đọc chi tiết lỗi.`);
-          }
-
-          if (response.status === 400 && errorData.error && errorData.error.message &&
-            (errorData.error.message.toLowerCase().includes("api key not valid") ||
-              errorData.error.message.toLowerCase().includes("invalid api key") ||
-              errorData.error.message.toLowerCase().includes("api_key_invalid"))) {
-            localStorage.removeItem('googleApiKey');
-            currentApiKey = null;
-            addMessage("API Key không hợp lệ hoặc đã hết hạn. Vui lòng nhập lại.", 'ai');
-            loadAndPromptApiKey();
-          } else {
-            const detailMessage = errorData.error && errorData.error.message ? errorData.error.message : `Mã lỗi ${response.status}`;
-            addMessage(`Lỗi từ AI: ${detailMessage}. Vui lòng thử lại.`, 'ai');
-          }
-          return;
-        }
-
-        const result = await response.json();
-        if (result.candidates && result.candidates.length > 0 &&
-          result.candidates[0].content && result.candidates[0].content.parts &&
-          result.candidates[0].content.parts.length > 0) {
-          const text = result.candidates[0].content.parts[0].text;
-          addMessage(text, 'ai');
-        } else {
-          addMessage("Xin lỗi, AI không thể tạo ra phản hồi vào lúc này. Cấu trúc phản hồi không mong đợi.", 'ai');
-          console.error("Lỗi: Cấu trúc phản hồi từ API không mong đợi hoặc nội dung bị thiếu.", result);
-        }
-      } catch (error) {
-        console.error('Lỗi khi gọi API Google AI:', error);
-        addMessage("Xin lỗi, có lỗi xảy ra khi kết nối với AI. Vui lòng thử lại sau.", 'ai');
-      } finally {
-        loadingIndicator.style.display = 'none';
-      }
-    }
-
-
-    sendButton.addEventListener('click', () => {
-      if (!currentApiKey) {
-        showApiKeyModal();
-        addMessage("Vui lòng cung cấp API Key trước khi gửi tin nhắn.", 'ai');
-        return;
-      }
-
-      const currentTime = Date.now();
-
-      minuteMessageTimestamps = minuteMessageTimestamps.filter(timestamp => currentTime - timestamp < MINUTE_TIME_WINDOW);
-      if (minuteMessageTimestamps.length >= MINUTE_MESSAGE_LIMIT) {
-        addMessage("Bạn đã gửi quá nhiều tin nhắn. Vui lòng thử lại sau 1 phút.", 'ai');
-        sendButton.disabled = true;
-        setTimeout(() => {
-          checkRateLimitsAndToggleButtonState();
-        }, Math.max(0, MINUTE_TIME_WINDOW - (currentTime - minuteMessageTimestamps[0])) + 100);
-        return;
-      }
-
-      dailyMessageTimestamps = dailyMessageTimestamps.filter(timestamp => currentTime - timestamp < DAILY_TIME_WINDOW);
-      if (dailyMessageTimestamps.length >= DAILY_MESSAGE_LIMIT) {
-        addMessage("Bạn đã đạt giới hạn tin nhắn hàng ngày. Vui lòng thử lại sau.", 'ai');
-        sendButton.disabled = true;
-        setTimeout(() => {
-          checkRateLimitsAndToggleButtonState();
-        }, Math.max(0, DAILY_TIME_WINDOW - (currentTime - dailyMessageTimestamps[0])) + 100);
-        return;
-      }
-
-      const message = chatInput.value.trim();
-      if (message) {
-        addMessage(message, 'user');
-        minuteMessageTimestamps.push(currentTime);
-        dailyMessageTimestamps.push(currentTime);
-        getAIResponse(message);
-        chatInput.value = '';
-        checkRateLimitsAndToggleButtonState();
-      }
-    });
-
-
-    chatInput.addEventListener('keypress', (event) => {
-      if (event.key === 'Enter') {
-        sendButton.click();
-      }
-    });
-
-    saveApiKeyButton.addEventListener('click', () => {
-      const key = apiKeyInput.value.trim();
-      if (key) {
-        localStorage.setItem('googleApiKey', key);
-        currentApiKey = key;
-        hideApiKeyModal();
-        addMessage("Đã lưu API Key. Bây giờ bạn có thể bắt đầu chat!", 'ai');
-        apiKeyInput.value = '';
-      } else {
-        alert("Vui lòng nhập API Key hợp lệ.");
-      }
-      checkRateLimitsAndToggleButtonState();
-    });
-
-    loadAndPromptApiKey(); 
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script type="module" src="./script.js"></script>
 </body>
 
 </html>
