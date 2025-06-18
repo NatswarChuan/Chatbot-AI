@@ -33,6 +33,7 @@
 *::after {
   box-sizing: border-box;
 }
+
 body {
   font-family: 'Inter', sans-serif;
   background-color: var(--background-secondary);
@@ -46,6 +47,8 @@ body {
 }
 
 .chat-container {
+  /* position: relative;  Không cần thiết vì không còn z-index */
+  /* z-index: 1000; */       /* Đã loại bỏ z-index của chat-container */
   width: 100%;
   max-width: 800px;
   height: 90vh;
@@ -149,13 +152,15 @@ body {
 
 .ai-message {
   align-self: flex-start;
-  width: 100%;
+  max-width: 95%;
 }
 
 .ai-message .message-content {
-  background-color: transparent;
+  background-color: var(--background-secondary);
   color: var(--text-primary);
-  padding: 0;
+  padding: 0.75rem 1.25rem;
+  border-radius: 1.25rem;
+  border-bottom-left-radius: 0.25rem;
 }
 
 .chat-input-area {
@@ -274,25 +279,32 @@ body {
 }
 
 .loading-indicator {
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  padding: 0.5rem;
+  padding: 0.75rem 1.25rem;
   font-style: italic;
-  color: var(--text-secondary);
+  color: var(--text-primary);
+  background-color: var(--background-secondary);
+  border-radius: 1.25rem;
+
+  max-width: fit-content;
 }
 
 .spinner {
-  width: 99px;
-  height: 99px;
-  border: 3px solid var(--border-color);
-  border-left-color: #168AFE;
+  width: 24px;
+  height: 24px;
+  border: 4px solid var(--border-color);
+  border-left-color: var(--accent-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
+.dark-theme .loading-indicator {}
+
 .dark-theme .spinner {
+
   border-left-color: #9F33FE;
 }
 
@@ -379,19 +391,25 @@ body {
 
 
 .ai-message .message-content p {
-  padding: 0.25rem 1.25rem;
+
+  margin-bottom: 0.5em;
+}
+
+.ai-message .message-content p:last-child {
+  margin-bottom: 0;
 }
 
 .ai-message .message-content ul,
 .ai-message .message-content ol {
-  padding-left: 2.5rem;
-  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
 }
 
 .ai-message .message-content blockquote {
   border-left: 4px solid var(--border-color);
   padding-left: 1rem;
-  margin: 0.5em 1.25rem;
+  margin: 0.5em 0;
   color: var(--text-secondary);
 }
 
@@ -440,7 +458,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 9999; /* Đặt z-index của pingOverlay là 9999 */
 }
 
 .modal-content-box {
@@ -542,19 +560,20 @@ body {
   background-color: #1d4ed8;
 }
 
-/* Responsive adjustments */
+
 @media (max-width: 768px) {
   body {
-    /* Ensure no extra scroll on small screens if chat container is full height */
+
     overflow: hidden;
   }
+
   .chat-container {
-    height: 100vh; /* Full height on mobile */
+    height: 100vh;
     max-height: 100vh;
-    margin: 0; /* No margin on mobile */
-    border-radius: 0; /* No border radius on mobile */
-    border: none; /* No border on mobile */
-    box-shadow: none; /* No shadow on mobile */
+    margin: 0;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
   }
 
   .chat-header {
@@ -563,6 +582,7 @@ body {
 
   .chat-messages {
     padding: 1rem;
+    z-index: 1001;
   }
 
   .chat-input-area {

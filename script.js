@@ -1,3 +1,4 @@
+import { GoogleGenAI } from 'https://cdn.jsdelivr.net/npm/@google/genai@1.5.1/+esm';
 document.addEventListener('DOMContentLoaded', () => {
 
 
@@ -44,11 +45,13 @@ document.addEventListener('DOMContentLoaded', () => {
   /** @const {string} URL cơ sở của API endpoint. */
   const API_ENDPOINT_BASE = 'https://generativelanguage.googleapis.com/v1beta/models/';
   /** @const {string} Tên model AI sử dụng. */
-  const AI_MODEL_NAME = 'gemini-1.5-flash-latest';
+  const AI_MODEL_NAME = 'gemma-3n-e4b-it';
   /** @const {string} Phần prompt phụ được thêm vào mỗi yêu cầu, bao gồm yêu cầu về giới hạn token và ngôn ngữ. */
   const SUB_PROMPT = `\n***LƯU Ý QUAN TRỌNG***: Chỉ trả lời bằng ngôn ngữ `;
-  /** @const {string} Phần prompt được gửi đi để kiểm tra và đảm bảo chỉ được phép trả về 8192 token. */
-  const PING_PROMPT = `***LƯU Ý QUAN TRỌNG***: Đảm bảo gói gọn tất cả câu trả lời từ bây giờ trong 8192 token.`;
+  /** @const {string} Phần prompt được gửi đi để kiểm tra và đảm bảo chỉ được phép trả về 32768 token. */
+  const PING_PROMPT = `***LƯU Ý QUAN TRỌNG***: Đảm bảo gói gọn tất cả các yêu cầu đều có tổng cửa sổ ngữ cảnh là 32,768 (32K) token.`;
+  /** @const {number} Giới hạn token tối đa cho một request gửi đến API. */
+  const MAX_REQUEST_TOKENS = 32768;
 
 
   /** @type {string|null} API key hiện tại của người dùng. */
@@ -67,8 +70,6 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   /** @type {MessageLimits} Đối tượng lưu trữ thông tin giới hạn tin nhắn. */
   let messageLimits = { minuteTimestamps: [], dailyTimestamps: [], dailyResetTimestamp: getNextDailyResetTimestamp() };
-  /** @const {number} Giới hạn ký tự cho toàn bộ phần text của prompt gửi đến API. */
-  const PROMPT_CHARACTER_LIMIT = 2048;
   /** @type {string} Ngôn ngữ hiện tại của giao diện. */
   let currentLanguage = 'vi';
   const supportedLanguages = ['vi', 'en'];
@@ -100,11 +101,9 @@ document.addEventListener('DOMContentLoaded', () => {
       'themeToggleButtonTitle': 'Chuyển đổi theme',
       'aiReplying': 'AI đang trả lời...',
       'chatInputPlaceholder': 'Nhắn tin cho AI...',
-      'charCounterFormat': '{current}/{max}',
       'inputErrorEmpty': 'Nội dung tin nhắn không được để trống.',
       'inputErrorApiKey': 'Vui lòng cung cấp API Key để gửi tin nhắn.',
       'inputErrorRateLimit': 'Bạn đã đạt giới hạn gửi tin nhắn. Vui lòng thử lại sau.',
-      'inputErrorTooLong': 'Nội dung tin nhắn quá dài. Giới hạn cho phép là {maxChars} ký tự.',
       'inputErrorGeneral': 'Không thể gửi tin nhắn. Vui lòng kiểm tra lại.',
       'apiKeyModalTitle': 'Nhập API Key của Google AI',
       'apiKeyModalDescription': 'Để sử dụng chatbot, bạn cần cung cấp API Key. Bạn có thể lấy API Key từ <a href="https://aistudio.google.com/app/apikey" target="_blank" class="font-medium">Google AI Studio</a>.',
@@ -116,6 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
       'welcomeMessageNoKey': 'Xin chào! Vui lòng cung cấp API Key của Google AI để bắt đầu.',
       'welcomeMessageWithKey': 'Xin chào! Tôi có thể giúp gì cho bạn?',
       'errorAIGeneric': 'Đã có lỗi xảy ra: {errorMessage}',
+      'inputErrorTooLongTokens': 'Nội dung prompt quá dài. Giới hạn token cho phép là {maxTokens}, prompt hiện tại có {currentTokens} token.',
       'errorAINoContent': 'AI không trả về nội dung.',
       'copyButtonText': 'Copy',
       'copyButtonCopiedText': 'Đã chép!',
@@ -130,11 +130,9 @@ document.addEventListener('DOMContentLoaded', () => {
       'themeToggleButtonTitle': 'Toggle theme',
       'aiReplying': 'AI is replying...',
       'chatInputPlaceholder': 'Message AI...',
-      'charCounterFormat': '{current}/{max}',
       'inputErrorEmpty': 'Message content cannot be empty.',
       'inputErrorApiKey': 'Please provide an API Key to send messages.',
       'inputErrorRateLimit': 'You have reached the message limit. Please try again later.',
-      'inputErrorTooLong': 'Message content is too long. The allowed limit is {maxChars} characters.',
       'inputErrorGeneral': 'Cannot send message. Please check again.',
       'apiKeyModalTitle': 'Enter Google AI API Key',
       'apiKeyModalDescription': 'To use the chatbot, you need to provide an API Key. You can get your API Key from <a href="https://aistudio.google.com/app/apikey" target="_blank" class="font-medium">Google AI Studio</a>.',
@@ -146,6 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
       'welcomeMessageNoKey': 'Hello! Please provide your Google AI API Key to begin.',
       'welcomeMessageWithKey': 'Hello! How can I help you today?',
       'errorAIGeneric': 'An error occurred: {errorMessage}',
+      'inputErrorTooLongTokens': 'Prompt content is too long. The allowed token limit is {maxTokens}, current prompt has {currentTokens} tokens.',
       'errorAINoContent': 'AI did not return any content.',
       'copyButtonText': 'Copy',
       'copyButtonCopiedText': 'Copied!',
@@ -239,16 +238,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /**
-   * Tính toán giới hạn ký tự hiệu dụng cho người dùng nhập vào,
-   * dựa trên tổng giới hạn và độ dài của prompt phụ sẽ được thêm vào.
-   * @returns {number} Giới hạn ký tự hiệu dụng cho người dùng.
-   */
-  function getEffectiveMaxUserChars() {
-    const fullLanguageName = getCurrentFullLanguageName();
-    const subPromptAdditionLength = (SUB_PROMPT + fullLanguageName).length;
-    return PROMPT_CHARACTER_LIMIT - subPromptAdditionLength;
-  }
-  /**
    * Tính toán và trả về timestamp của thời điểm 00:00:00 ngày tiếp theo.
    * Được sử dụng để xác định thời điểm reset giới hạn tin nhắn hàng ngày.
    *
@@ -339,12 +328,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function checkRateLimitsAndToggleButtonState() {
     const currentTime = Date.now();
     const currentLength = chatInput.value.length;
-    const effectiveMaxChars = getEffectiveMaxUserChars();
 
-    charCounter.textContent = translations[currentLanguage].charCounterFormat
-      .replace('{current}', currentLength)
-      .replace('{max}', effectiveMaxChars);
-    charCounter.classList.toggle('error', currentLength > effectiveMaxChars);
+    charCounter.textContent = currentLength.toString();
 
 
     if (currentTime >= messageLimits.dailyResetTimestamp) {
@@ -359,7 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const isRateLimited = minuteCount >= MINUTE_MESSAGE_LIMIT || dailyCount >= DAILY_MESSAGE_LIMIT;
 
-    sendButton.disabled = isInputEmpty || currentLength > effectiveMaxChars || isRateLimited || !currentApiKey;
+    sendButton.disabled = isInputEmpty || isRateLimited || !currentApiKey;
     chatInput.disabled = isRateLimited || !currentApiKey;
 
 
@@ -367,8 +352,6 @@ document.addEventListener('DOMContentLoaded', () => {
       showInputError("inputErrorApiKey");
     } else if (isRateLimited) {
       showInputError("inputErrorRateLimit");
-    } else if (currentLength > effectiveMaxChars) {
-      showInputError("inputErrorTooLong", { maxChars: effectiveMaxChars });
     } else {
       clearInputError();
     }
@@ -464,8 +447,9 @@ document.addEventListener('DOMContentLoaded', () => {
    * Gửi yêu cầu đến API của Google AI để nhận phản hồi dựa trên prompt từ người dùng.
    * Gửi yêu cầu đến API của Google AI và xử lý phản hồi.
    * @param {string} prompt - Nội dung prompt (tin nhắn của người dùng) để gửi đến AI.
+   * @param {string} userPromptContent - Nội dung prompt (tin nhắn của người dùng) để gửi đến AI.
    */
-  async function getAIResponse(prompt) {
+  async function getAIResponse(userPromptContent) {
     if (!currentApiKey) {
       addMessage("inputErrorApiKey", 'ai');
       showApiKeyModal();
@@ -474,34 +458,54 @@ document.addEventListener('DOMContentLoaded', () => {
     showPingOverlay();
     sendButton.disabled = true;
 
-    let fullLanguageName = currentLanguage;
-    if (translations[currentLanguage] && translations[currentLanguage].fullLanguageName) {
-      fullLanguageName = translations[currentLanguage].fullLanguageName;
-    }
-
-    prompt += SUB_PROMPT + fullLanguageName;
-
-    if (prompt.length > PROMPT_CHARACTER_LIMIT) {
-      hidePingOverlay();
-      addMessage("inputErrorTooLong", 'ai', { maxChars: PROMPT_CHARACTER_LIMIT });
-      checkRateLimitsAndToggleButtonState();
-      return;
-    }
-
+    const fullLanguageName = getCurrentFullLanguageName();
+    const completePromptText = userPromptContent + SUB_PROMPT + fullLanguageName;
 
     try {
+
+      if (!GoogleGenAI) {
+        console.error("Lỗi: GoogleGenAI SDK chưa được tải hoặc không hợp lệ.");
+        addMessage("errorAIGeneric", 'ai', { errorMessage: "Thư viện AI chưa sẵn sàng." });
+        hidePingOverlay();
+        return;
+      }
+
+
+      const genAI = new GoogleGenAI({ apiKey: currentApiKey });
+
+      const countResponse = await genAI.models.countTokens({
+        model: AI_MODEL_NAME,
+        contents: completePromptText,
+      });
+      const { totalTokens } = countResponse;
+
+      if (totalTokens > (MAX_REQUEST_TOKENS / 2)) {
+        hidePingOverlay();
+        addMessage("inputErrorTooLongTokens", 'ai', { maxTokens: (MAX_REQUEST_TOKENS / 2), currentTokens: totalTokens });
+        checkRateLimitsAndToggleButtonState();
+        return;
+      }
+
+      console.log(totalTokens);
+
+
       const response = await fetch(`${API_ENDPOINT_BASE}${AI_MODEL_NAME}:generateContent?key=${currentApiKey}`, {
         method: 'POST',
         signal: AbortSignal.timeout(30000),
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }] })
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: completePromptText }] }],
+          generationConfig: {
+            maxOutputTokens: MAX_REQUEST_TOKENS - totalTokens,
+            temperature: 0.7,
+          }
+        })
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: { message: 'Không thể phân tích phản hồi lỗi từ API.' } }));
         throw new Error(errorData?.error?.message || `Lỗi API: ${response.status} ${response.statusText}`);
       }
-
       const result = await response.json();
       const aiText = result.candidates?.[0]?.content?.parts?.[0]?.text;
 
@@ -510,7 +514,6 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         addMessage("errorAINoContent", 'ai');
       }
-
     } catch (error) {
       console.error('Lỗi API:', error);
       const errorMessageKey = "errorAIGeneric";
@@ -533,11 +536,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    let fullLanguageName = langToApply;
-    if (translations[langToApply] && translations[langToApply].fullLanguageName) {
-      fullLanguageName = translations[langToApply].fullLanguageName;
-    }
-
+    const fullLanguageName = (translations[langToApply] && translations[langToApply].fullLanguageName) ? translations[langToApply].fullLanguageName : langToApply;
     const initialPrompt = PING_PROMPT + fullLanguageName;
     showPingOverlay();
 
@@ -570,15 +569,9 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   function handleSendMessage() {
     const message = chatInput.value.trim();
-    const currentInputLength = chatInput.value.length;
-    const effectiveMaxChars = getEffectiveMaxUserChars();
 
     if (!message) {
       showInputError("inputErrorEmpty");
-      return;
-    }
-    if (currentInputLength > effectiveMaxChars) {
-      showInputError("inputErrorTooLong", { maxChars: effectiveMaxChars });
       return;
     }
     if (sendButton.disabled) return;
@@ -602,7 +595,8 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   function handleSaveApiKey() {
     const key = apiKeyInput.value.trim();
-    if (key) {
+
+    if (key && key !== "null" && key !== "undefined") {
       localStorage.setItem('googleApiKey', key);
       currentApiKey = key;
       hideApiKeyModal();
@@ -620,12 +614,19 @@ document.addEventListener('DOMContentLoaded', () => {
    * Khởi tạo và kiểm tra API key khi trang được tải lần đầu.
    */
   function initializeApiKey() {
-    currentApiKey = localStorage.getItem('googleApiKey');
-    if (!currentApiKey) {
+    const storedApiKey = localStorage.getItem('googleApiKey');
+    const trimmedKey = storedApiKey ? storedApiKey.trim() : null;
+
+    if (trimmedKey && trimmedKey !== "null" && trimmedKey !== "undefined") {
+      currentApiKey = trimmedKey;
+      addMessage("welcomeMessageWithKey", 'ai');
+    } else {
+      currentApiKey = null;
+      if (storedApiKey) {
+        localStorage.removeItem('googleApiKey');
+      }
       addMessage("welcomeMessageNoKey", 'ai');
       showApiKeyModal();
-    } else {
-      addMessage("welcomeMessageWithKey", 'ai');
     }
     checkRateLimitsAndToggleButtonState();
   }
@@ -669,9 +670,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  initializeApiKey();
   initializeTheme();
   loadMessageLimits();
   initializeLanguage();
-  initializeApiKey();
   sendInitialPingToAI(currentLanguage);
 });
