@@ -12,7 +12,7 @@ export const AI_MODEL_NAME = 'gemma-3n-e4b-it';
 export const SUB_PROMPT = `\n***LƯU Ý QUAN TRỌNG***: Chỉ trả lời bằng ngôn ngữ `;
 
 /** @const {string} Prompt được sử dụng để "ping" AI, đảm bảo AI nhận thức được giới hạn token. */
-export const PING_PROMPT = `***LƯU Ý QUAN TRỌNG***: Đảm bảo gói gọn tất cả các yêu cầu đều có tổng cửa sổ ngữ cảnh là 32,768 (32K) token.`;
+export const PING_PROMPT = `Xin chào, hãy giới thiệu bản thân như một Chat Bot AI được tạo ra bởi NatswarChuan.`;
 
 /** @const {number} Giới hạn số lượng tin nhắn người dùng có thể gửi trong một phút. */
 export const MINUTE_MESSAGE_LIMIT = 30;
@@ -47,7 +47,6 @@ export const TRANSLATIONS = {
       'apiKeySavedMessage': 'Đã lưu API Key. Bây giờ bạn có thể bắt đầu chat!',
       'apiKeyInvalidMessage': 'Vui lòng nhập API Key hợp lệ.',
       'welcomeMessageNoKey': 'Xin chào! Vui lòng cung cấp API Key của Google AI để bắt đầu.',
-      'welcomeMessageWithKey': 'Xin chào! Tôi có thể giúp gì cho bạn?',
       'errorAIGeneric': 'Đã có lỗi xảy ra: {errorMessage}',
       'errorAINoContent': 'AI không trả về nội dung.',
       'copyButtonText': 'Copy',
@@ -74,7 +73,6 @@ export const TRANSLATIONS = {
       'apiKeySavedMessage': 'API Key saved. You can now start chatting!',
       'apiKeyInvalidMessage': 'Please enter a valid API Key.',
       'welcomeMessageNoKey': 'Hello! Please provide your Google AI API Key to begin.',
-      'welcomeMessageWithKey': 'Hello! How can I help you today?',
       'errorAIGeneric': 'An error occurred: {errorMessage}',
       'errorAINoContent': 'AI did not return any content.',
       'copyButtonText': 'Copy',

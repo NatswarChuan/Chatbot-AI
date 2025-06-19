@@ -1,11 +1,11 @@
 import * as dom from './dom.js';
 import state from './state.js';
-import { TRANSLATIONS, SUPPORTED_LANGUAGES } from './config.js';
-import { getAIResponse, sendInitialPingToAI } from './api.js';
-import { 
-    addMessage, showApiKeyModal, hideApiKeyModal, handleModalEscapeKey, 
-    clearInputError, checkRateLimitsAndToggleButtonState, setLanguage, 
-    initializeLanguage, showInputError 
+import { TRANSLATIONS, SUPPORTED_LANGUAGES, PING_PROMPT } from './config.js';
+import { getAIResponse } from './api.js';
+import {
+    addMessage, showApiKeyModal, hideApiKeyModal, handleModalEscapeKey,
+    clearInputError, checkRateLimitsAndToggleButtonState, setLanguage,
+    initializeLanguage, showInputError
 } from './ui.js';
 
 /**
@@ -94,11 +94,9 @@ function initializeApiKey() {
 
     if (trimmedKey && trimmedKey !== "null" && trimmedKey !== "undefined") {
         state.currentApiKey = trimmedKey;
-        addMessage("welcomeMessageWithKey", 'ai');
     } else {
         state.currentApiKey = null;
         if (storedApiKey) localStorage.removeItem('googleApiKey');
-        addMessage("welcomeMessageNoKey", 'ai');
         showApiKeyModal();
     }
     checkRateLimitsAndToggleButtonState();
@@ -168,5 +166,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeTheme();
     loadMessageLimits();
     initializeLanguage();
-    sendInitialPingToAI();
+    getAIResponse(PING_PROMPT);
 });
