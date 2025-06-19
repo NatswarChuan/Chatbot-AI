@@ -75,7 +75,7 @@ export function addMessage(messageOrKey, sender, params = {}) {
     messageElement.appendChild(contentWrapper);
     dom.chatMessages.appendChild(messageElement);
     dom.chatMessages.scrollTop = dom.chatMessages.scrollHeight;
-    
+
     return contentWrapper;
 }
 
@@ -197,14 +197,14 @@ export function setLanguage(lang) {
     document.documentElement.lang = lang;
 
     const t = TRANSLATIONS[lang];
-    
+
     document.querySelectorAll('[data-translation-key]').forEach(el => {
         const key = el.dataset.translationKey;
         if (t[key]) {
             if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') {
                 el.placeholder = t[key];
             } else if (el.tagName === 'P' && key === 'apiKeyModalDescription') {
-                 el.innerHTML = t[key];
+                el.innerHTML = t[key];
             }
             else {
                 el.textContent = t[key];
@@ -214,7 +214,7 @@ export function setLanguage(lang) {
 
     dom.menuLanguageIndicator.textContent = lang.toUpperCase();
     document.title = t.pageTitle;
-    
+
     checkRateLimitsAndToggleButtonState();
 }
 

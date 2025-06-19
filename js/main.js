@@ -79,6 +79,7 @@ function handleSaveApiKey() {
         clearInputError();
         addMessage("apiKeySavedMessage", 'ai');
         dom.apiKeyInput.value = '';
+        sendInitialPingToAI();
     } else {
         alert(TRANSLATIONS[state.currentLanguage].apiKeyInvalidMessage);
     }
