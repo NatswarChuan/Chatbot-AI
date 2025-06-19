@@ -1,7 +1,7 @@
 import * as dom from './dom.js';
 import state from './state.js';
-import { TRANSLATIONS, SUPPORTED_LANGUAGES, PING_PROMPT } from './config.js';
-import { getAIResponse } from './api.js';
+import { TRANSLATIONS, SUPPORTED_LANGUAGES } from './config.js';
+import { getAIResponse, sendInitialPingToAI } from './api.js';
 import {
     addMessage, showApiKeyModal, hideApiKeyModal, handleModalEscapeKey,
     clearInputError, checkRateLimitsAndToggleButtonState, setLanguage,
@@ -166,5 +166,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeTheme();
     loadMessageLimits();
     initializeLanguage();
-    getAIResponse(PING_PROMPT);
+    sendInitialPingToAI();
 });

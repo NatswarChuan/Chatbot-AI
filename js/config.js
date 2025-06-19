@@ -12,7 +12,7 @@ export const AI_MODEL_NAME = 'gemma-3n-e4b-it';
 export const SUB_PROMPT = `\n***LƯU Ý QUAN TRỌNG***: Chỉ trả lời bằng ngôn ngữ `;
 
 /** @const {string} Prompt được sử dụng để "ping" AI, đảm bảo AI nhận thức được giới hạn token. */
-export const PING_PROMPT = `Xin chào, hãy giới thiệu bản thân như một Chat Bot AI được tạo ra bởi NatswarChuan.`;
+export const PING_PROMPT = `Xin chào, hãy giới thiệu ngắn gọn bản thân như một Chat Bot AI được tạo ra bởi NatswarChuan và những điểm mạnh cũng như điểm yếu của bản thân. Sử dụng ngôi thứ nhất là "tôi".`;
 
 /** @const {number} Giới hạn số lượng tin nhắn người dùng có thể gửi trong một phút. */
 export const MINUTE_MESSAGE_LIMIT = 30;

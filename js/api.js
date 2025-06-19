@@ -41,7 +41,7 @@ export async function getAIResponse(userPromptContent) {
 
     function renderLoop(currentTime) {
         const chatBox = dom.chatMessages;
-        const scrollThreshold = 50; 
+        const scrollThreshold = 50;
         const isScrolledToBottom = chatBox.scrollHeight - chatBox.clientHeight <= chatBox.scrollTop + scrollThreshold;
         const timeSinceLastChar = Date.now() - lastCharTypedTime;
 
@@ -62,22 +62,22 @@ export async function getAIResponse(userPromptContent) {
         try {
             let html = marked.parse(fullResponseText + CURSOR_HTML);
             aiMessageContent.innerHTML = html;
-        } catch(e) {
+        } catch (e) {
             console.error("Lỗi khi render nội dung:", e);
         }
-        
+
         if (isScrolledToBottom) {
             chatBox.scrollTop = chatBox.scrollHeight;
         }
-        
+
         if (!streamFinished || textQueue.length > 0) {
             requestAnimationFrame(renderLoop);
         } else {
             aiMessageContent.innerHTML = marked.parse(fullResponseText);
-            addCopyButtons(aiMessageContent); 
+            addCopyButtons(aiMessageContent);
             const messageBubble = aiMessageContent.parentElement;
             if (messageBubble) {
-                addCopyMessageButton(messageBubble); 
+                addCopyMessageButton(messageBubble);
             }
             aiMessageContent.querySelectorAll('pre code').forEach((block) => {
                 hljs.highlightElement(block);
@@ -121,21 +121,6 @@ export async function getAIResponse(userPromptContent) {
  * @async
  */
 export async function sendInitialPingToAI() {
-    if (!state.currentApiKey || state.isApiCallInProgress) return;
-
     state.isApiCallInProgress = true;
-    const fullLanguageName = getCurrentFullLanguageName();
-    const initialPrompt = PING_PROMPT + fullLanguageName;
-
-    try {
-        const genAI = new GoogleGenAI({ apiKey: state.currentApiKey });
-        await genAI.models.generateContent({
-             model: AI_MODEL_NAME,
-             contents: [{ role: "user", parts: [{ text: initialPrompt }] }]
-        });
-    } catch (error) {
-        console.warn(`Lỗi khi gửi ping đến AI: ${error.message}`);
-    } finally {
-        state.isApiCallInProgress = false;
-    }
+    getAIResponse(PING_PROMPT);
 }
