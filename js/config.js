@@ -6,7 +6,7 @@
 export const API_ENDPOINT_BASE = 'https://generativelanguage.googleapis.com/v1beta/models/';
 
 /** @const {string} Tên model AI được sử dụng. */
-export const AI_MODEL_NAME = 'gemma-3n-e4b-it';
+export const AI_MODEL_NAME = 'gemma-3-27b-it';
 
 /** @const {string} Phần prompt phụ được thêm vào cuối mỗi yêu cầu của người dùng để hướng dẫn AI về ngôn ngữ trả lời. */
 export const SUB_PROMPT = `\n***LƯU Ý QUAN TRỌNG***: Chỉ trả lời bằng ngôn ngữ `;
