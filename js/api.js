@@ -4,6 +4,9 @@ import { AI_MODEL_NAME, SUB_PROMPT, PING_PROMPT, TRANSLATIONS } from './config.j
 import { addMessage, addThinkingBlock, showApiKeyModal, checkRateLimitsAndToggleButtonState, addCopyButtons, addCopyMessageButton } from './ui.js';
 import * as dom from './dom.js';
 
+/** @const {number} Số lượt hội thoại gần nhất gửi kèm để AI hiểu context (mỗi lượt gồm 1 user + 1 model). */
+const CONTEXT_TURNS = 5;
+
 /**
  * Lấy tên đầy đủ của ngôn ngữ hiện tại dựa trên mã ngôn ngữ.
  * @returns {string} Tên đầy đủ của ngôn ngữ hiện tại.
@@ -33,6 +36,14 @@ export async function getAIResponse(userPromptContent, showThinking = true) {
     const completePromptText = userPromptContent + SUB_PROMPT + fullLanguageName;
     const aiMessageContent = addMessage("", 'ai');
     const messageBubble = aiMessageContent.parentElement;
+
+    // --- Xây dựng contents kèm lịch sử hội thoại (multi-turn context) ---
+    // Lấy tối đa CONTEXT_TURNS lượt gần nhất (mỗi lượt = 2 phần tử: user + model)
+    const historySlice = state.conversationHistory.slice(-(CONTEXT_TURNS * 2));
+    const contents = [
+        ...historySlice,
+        { role: "user", parts: [{ text: completePromptText }] }
+    ];
 
     // --- Thinking block setup (bỏ qua nếu showThinking = false) ---
     let thinkingController = null;
@@ -101,7 +112,7 @@ export async function getAIResponse(userPromptContent, showThinking = true) {
         const genAI = new GoogleGenAI({ apiKey: state.currentApiKey });
         const stream = await genAI.models.generateContentStream({
             model: AI_MODEL_NAME,
-            contents: [{ role: "user", parts: [{ text: completePromptText }] }],
+            contents,
             generationConfig: { temperature: 0.7 }
         });
 
@@ -150,6 +161,14 @@ export async function getAIResponse(userPromptContent, showThinking = true) {
         // Nếu AI chỉ có thinking mà không có response (hiếm), cũng finalize
         if (hasThinkingContent && thinkingController) {
             thinkingController.finalize();
+        }
+        // Lưu lượt hội thoại vào history (chỉ khi có response và không phải ping)
+        if (showThinking && fullResponseText.trim()) {
+            state.conversationHistory = [
+                ...state.conversationHistory,
+                { role: "user",  parts: [{ text: completePromptText }] },
+                { role: "model", parts: [{ text: fullResponseText }] }
+            ];
         }
         streamFinished = true;
         state.isApiCallInProgress = false;

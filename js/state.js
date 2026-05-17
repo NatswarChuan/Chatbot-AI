@@ -18,6 +18,12 @@ let currentLanguage = SUPPORTED_LANGUAGES[0];
 let isApiCallInProgress = false;
 /** @type {boolean} Trạng thái cho biết người dùng có yêu cầu ngừng tạo phản hồi hay không. */
 let stopGeneration = false;
+/**
+ * @type {Array<{role: 'user'|'model', parts: [{text: string}]}>}
+ * Lịch sử hội thoại (không bao gồm nội dung thinking của AI).
+ * Mỗi phần tử là một turn theo format Gemini multi-turn.
+ */
+let conversationHistory = [];
 
 /**
  * Đối tượng trạng thái toàn cục của ứng dụng.
@@ -34,6 +40,8 @@ const state = {
     set isApiCallInProgress(status) { isApiCallInProgress = status; },
     get stopGeneration() { return stopGeneration; },
     set stopGeneration(value) { stopGeneration = value; },
+    get conversationHistory() { return conversationHistory; },
+    set conversationHistory(history) { conversationHistory = history; },
 };
 
 export default state;
