@@ -1,7 +1,7 @@
 import { GoogleGenAI } from 'https://cdn.jsdelivr.net/npm/@google/genai@1.5.1/+esm';
 import state from './state.js';
 import { AI_MODEL_NAME, SUB_PROMPT, PING_PROMPT, TRANSLATIONS } from './config.js';
-import { addMessage, showApiKeyModal, checkRateLimitsAndToggleButtonState, addCopyButtons, addCopyMessageButton } from './ui.js';
+import { addMessage, addThinkingBlock, showApiKeyModal, checkRateLimitsAndToggleButtonState, addCopyButtons, addCopyMessageButton } from './ui.js';
 import * as dom from './dom.js';
 
 /**
@@ -14,10 +14,11 @@ function getCurrentFullLanguageName() {
 
 /**
  * Gửi yêu cầu đến API của AI và hiển thị phản hồi.
+ * Tự động phát hiện chunk có cờ `thought: true` để hiển thị thinking block riêng biệt.
  * @async
  * @param {string} userPromptContent - Nội dung prompt từ người dùng.
  */
-export async function getAIResponse(userPromptContent) {
+export async function getAIResponse(userPromptContent, showThinking = true) {
     if (!state.currentApiKey) {
         addMessage("inputErrorApiKey", 'ai');
         showApiKeyModal();
@@ -31,7 +32,14 @@ export async function getAIResponse(userPromptContent) {
     const fullLanguageName = getCurrentFullLanguageName();
     const completePromptText = userPromptContent + SUB_PROMPT + fullLanguageName;
     const aiMessageContent = addMessage("", 'ai');
+    const messageBubble = aiMessageContent.parentElement;
 
+    // --- Thinking block setup (bỏ qua nếu showThinking = false) ---
+    let thinkingController = null;
+    let fullThinkingText = "";
+    let hasThinkingContent = false;
+
+    // --- Main response stream ---
     let textQueue = "";
     let fullResponseText = "";
     let streamFinished = false;
@@ -75,7 +83,6 @@ export async function getAIResponse(userPromptContent) {
         } else {
             aiMessageContent.innerHTML = marked.parse(fullResponseText);
             addCopyButtons(aiMessageContent);
-            const messageBubble = aiMessageContent.parentElement;
             if (messageBubble) {
                 addCopyMessageButton(messageBubble);
             }
@@ -102,13 +109,48 @@ export async function getAIResponse(userPromptContent) {
             if (state.stopGeneration) {
                 break;
             }
-            textQueue += chunk.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+            const parts = chunk.candidates?.[0]?.content?.parts;
+            if (!parts) continue;
+
+            for (const part of parts) {
+                const isThought = part.thought === true;
+                const text = part.text || "";
+
+                if (isThought && text) {
+                    // Khởi tạo thinking block lần đầu tiên (chỉ khi showThinking = true)
+                    if (showThinking && !hasThinkingContent && messageBubble) {
+                        thinkingController = addThinkingBlock(messageBubble);
+                        hasThinkingContent = true;
+                    }
+                    // Cập nhật nội dung thinking realtime
+                    if (thinkingController) {
+                        fullThinkingText += text;
+                        thinkingController.setContent(fullThinkingText);
+                        // Scroll theo nếu đang ở bottom
+                        const chatBox = dom.chatMessages;
+                        const isAtBottom = chatBox.scrollHeight - chatBox.clientHeight <= chatBox.scrollTop + 50;
+                        if (isAtBottom) chatBox.scrollTop = chatBox.scrollHeight;
+                    }
+                } else if (!isThought && text) {
+                    // Khi nhận chunk response thật: finalize thinking block (1 lần)
+                    if (hasThinkingContent && thinkingController) {
+                        thinkingController.finalize();
+                        thinkingController = null; // Đánh dấu đã finalize
+                    }
+                    textQueue += text;
+                }
+            }
         }
     } catch (error) {
         console.error('Lỗi API:', error);
         textQueue += `\n\n**${TRANSLATIONS[state.currentLanguage].errorAIGeneric.replace('{errorMessage}', error.message)}**`;
         alert(TRANSLATIONS[state.currentLanguage].errorAIGeneric.replace('{errorMessage}', error.message));
     } finally {
+        // Nếu AI chỉ có thinking mà không có response (hiếm), cũng finalize
+        if (hasThinkingContent && thinkingController) {
+            thinkingController.finalize();
+        }
         streamFinished = true;
         state.isApiCallInProgress = false;
         state.stopGeneration = false;
@@ -122,5 +164,5 @@ export async function getAIResponse(userPromptContent) {
  */
 export async function sendInitialPingToAI() {
     state.isApiCallInProgress = true;
-    getAIResponse(PING_PROMPT);
+    getAIResponse(PING_PROMPT, false); // Bỏ qua thinking block cho câu chào giới thiệu
 }

@@ -234,3 +234,126 @@ body {
   .chat-messages { padding: 1rem; }
   .chat-input-area { padding: 0.75rem 1rem; }
 }
+
+/* ==================== THINKING BLOCK ==================== */
+.thinking-block {
+  width: 100%;
+  margin-bottom: 0.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.06) 0%, rgba(168, 85, 247, 0.04) 100%);
+  overflow: hidden;
+  transition: border-color 0.3s, background 0.3s;
+}
+.dark-theme .thinking-block {
+  border-color: rgba(167, 139, 250, 0.3);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(168, 85, 247, 0.07) 100%);
+}
+.thinking-block--done {
+  border-color: rgba(139, 92, 246, 0.2);
+  background: rgba(139, 92, 246, 0.04);
+}
+.dark-theme .thinking-block--done {
+  border-color: rgba(167, 139, 250, 0.2);
+  background: rgba(139, 92, 246, 0.06);
+}
+
+/* Header / Toggle button */
+.thinking-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.85rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #7c3aed;
+  text-align: left;
+  transition: background-color 0.2s;
+}
+.dark-theme .thinking-header {
+  color: #c4b5fd;
+}
+.thinking-header:hover {
+  background-color: rgba(139, 92, 246, 0.08);
+}
+
+/* Spinner */
+.thinking-spinner {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba(124, 58, 237, 0.25);
+  border-top-color: #7c3aed;
+  border-radius: 50%;
+  animation: thinking-spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+.dark-theme .thinking-spinner {
+  border-color: rgba(196, 181, 253, 0.25);
+  border-top-color: #c4b5fd;
+}
+@keyframes thinking-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Label */
+.thinking-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Chevron */
+.thinking-chevron {
+  flex-shrink: 0;
+  color: #7c3aed;
+  transition: transform 0.25s ease;
+}
+.dark-theme .thinking-chevron {
+  color: #c4b5fd;
+}
+.thinking-header[aria-expanded="true"] .thinking-chevron {
+  transform: rotate(180deg);
+}
+
+/* Body / Collapsible */
+.thinking-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+.thinking-body--open {
+  max-height: 600px;
+}
+
+/* Inner content */
+.thinking-content {
+  padding: 0.6rem 1rem 0.8rem 1rem;
+  font-size: 0.82rem;
+  line-height: 1.65;
+  color: var(--text-secondary);
+  border-top: 1px solid rgba(139, 92, 246, 0.15);
+  overflow-y: auto;
+  max-height: 580px;
+}
+.dark-theme .thinking-content {
+  border-top-color: rgba(167, 139, 250, 0.15);
+}
+.thinking-content p { margin-bottom: 0.4em; }
+.thinking-content p:last-child { margin-bottom: 0; }
+.thinking-content code {
+  background: rgba(139, 92, 246, 0.1);
+  border-radius: 0.25rem;
+  padding: 0.1em 0.35em;
+  font-size: 0.9em;
+  color: #6d28d9;
+}
+.dark-theme .thinking-content code {
+  background: rgba(167, 139, 250, 0.15);
+  color: #c4b5fd;
+}

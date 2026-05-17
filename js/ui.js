@@ -4,6 +4,80 @@ import { TRANSLATIONS, MINUTE_TIME_WINDOW, MINUTE_MESSAGE_LIMIT, DAILY_MESSAGE_L
 import { getNextDailyResetTimestamp } from './utils.js';
 
 /**
+ * Tạo và chèn một Thinking Block vào trước message bubble của AI.
+ * @param {HTMLElement} messageBubble - Phần tử .message-bubble của tin nhắn AI.
+ * @returns {{ setContent: function, finalize: function }} API để cập nhật nội dung và kết thúc.
+ */
+export function addThinkingBlock(messageBubble) {
+    const t = TRANSLATIONS[state.currentLanguage];
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'thinking-block';
+
+    const header = document.createElement('button');
+    header.className = 'thinking-header';
+    header.setAttribute('aria-expanded', 'false');
+    header.innerHTML = `
+        <span class="thinking-spinner"></span>
+        <span class="thinking-label">${t.thinkingLabel}</span>
+        <svg class="thinking-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+    `;
+
+    const body = document.createElement('div');
+    body.className = 'thinking-body';
+
+    const contentEl = document.createElement('div');
+    contentEl.className = 'thinking-content';
+    body.appendChild(contentEl);
+    wrapper.appendChild(header);
+    wrapper.appendChild(body);
+
+    // Chèn thinking block trước message-content
+    const messageContent = messageBubble.querySelector('.message-content');
+    messageBubble.insertBefore(wrapper, messageContent);
+
+    // Toggle mở/đóng
+    header.addEventListener('click', () => {
+        const isExpanded = header.getAttribute('aria-expanded') === 'true';
+        header.setAttribute('aria-expanded', String(!isExpanded));
+        body.classList.toggle('thinking-body--open', !isExpanded);
+        const labelEl = header.querySelector('.thinking-label');
+        if (!isExpanded) {
+            labelEl.textContent = TRANSLATIONS[state.currentLanguage].thinkingToggleHide;
+        } else {
+            const isDone = wrapper.classList.contains('thinking-block--done');
+            labelEl.textContent = isDone
+                ? TRANSLATIONS[state.currentLanguage].thinkingDoneLabel
+                : TRANSLATIONS[state.currentLanguage].thinkingLabel;
+        }
+    });
+
+    return {
+        /**
+         * Cập nhật nội dung thinking theo thời gian thực.
+         * @param {string} markdownText - Nội dung thinking đầy đủ tính tới hiện tại.
+         */
+        setContent(markdownText) {
+            try {
+                contentEl.innerHTML = marked.parse(markdownText);
+            } catch(e) {
+                contentEl.textContent = markdownText;
+            }
+        },
+        /**
+         * Đánh dấu thinking đã kết thúc, đổi sang trạng thái done.
+         */
+        finalize() {
+            wrapper.classList.add('thinking-block--done');
+            const spinnerEl = header.querySelector('.thinking-spinner');
+            if (spinnerEl) spinnerEl.remove();
+            const labelEl = header.querySelector('.thinking-label');
+            if (labelEl) labelEl.textContent = TRANSLATIONS[state.currentLanguage].thinkingDoneLabel;
+        }
+    };
+}
+
+/**
  * Xử lý sự kiện sao chép mã từ một khối mã.
  * @param {Event} event - Sự kiện click.
  * @param {HTMLElement} codeElement - Phần tử chứa mã cần sao chép.

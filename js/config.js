@@ -55,6 +55,10 @@ export const TRANSLATIONS = {
       'menuChangeTheme': 'Đổi giao diện',
       'menuSetApiKey': 'Nhập API Key',
       'menuLanguage': 'Ngôn ngữ:',
+      'thinkingLabel': 'Đang suy nghĩ...',
+      'thinkingDoneLabel': 'Đã suy nghĩ xong',
+      'thinkingToggleShow': 'Xem quá trình suy nghĩ',
+      'thinkingToggleHide': 'Ẩn quá trình suy nghĩ',
     },
     'en': {
       'fullLanguageName': 'English',
@@ -81,5 +85,9 @@ export const TRANSLATIONS = {
       'menuChangeTheme': 'Toggle theme',
       'menuSetApiKey': 'Set API Key',
       'menuLanguage': 'Language:',
+      'thinkingLabel': 'Thinking...',
+      'thinkingDoneLabel': 'Thought for a while',
+      'thinkingToggleShow': 'View thinking process',
+      'thinkingToggleHide': 'Hide thinking process',
     }
   };
