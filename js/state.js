@@ -25,6 +25,14 @@ let stopGeneration = false;
  */
 let conversationHistory = [];
 
+// --- Các cấu hình nâng cao mới cho Gemma 4 ---
+/** @type {{mimeType: string, data: string}|null} Ảnh đang được chọn để gửi kèm (base64). */
+let currentSelectedImage = null;
+/** @type {boolean} Trạng thái bật/tắt Google Search. */
+let isSearchEnabled = localStorage.getItem('isSearchEnabled') === 'true';
+/** @type {boolean} Trạng thái bật/tắt Thinking Mode (suy luận). Mặc định luôn là true. */
+const isThinkingEnabled = true;
+
 /**
  * Đối tượng trạng thái toàn cục của ứng dụng.
  * Sử dụng getters và setters để quản lý việc truy cập và cập nhật các thuộc tính trạng thái.
@@ -42,6 +50,14 @@ const state = {
     set stopGeneration(value) { stopGeneration = value; },
     get conversationHistory() { return conversationHistory; },
     set conversationHistory(history) { conversationHistory = history; },
+
+    // Getters & Setters cho các thuộc tính nâng cao
+    get currentSelectedImage() { return currentSelectedImage; },
+    set currentSelectedImage(img) { currentSelectedImage = img; },
+    get isSearchEnabled() { return isSearchEnabled; },
+    set isSearchEnabled(val) { isSearchEnabled = val; localStorage.setItem('isSearchEnabled', val); },
+    get isThinkingEnabled() { return true; },
+    set isThinkingEnabled(val) { /* Mặc định luôn là true */ }
 };
 
-export default state;
+export default state;

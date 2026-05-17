@@ -5,7 +5,8 @@ import { getAIResponse, sendInitialPingToAI } from './api.js';
 import {
     addMessage, showApiKeyModal, hideApiKeyModal, handleModalEscapeKey,
     clearInputError, checkRateLimitsAndToggleButtonState, setLanguage,
-    initializeLanguage, showInputError
+    initializeLanguage, showInputError, handleImageSelect, clearSelectedImage,
+    initializeDragDropAndPaste
 } from './ui.js';
 
 /**
@@ -45,20 +46,24 @@ function handleSendMessage() {
         return;
     }
     const message = dom.chatInput.value.trim();
-    if (!message) {
+    const hasImage = !!state.currentSelectedImage;
+    if (!message && !hasImage) {
         showInputError("inputErrorEmpty");
         return;
     }
     clearInputError();
-    addMessage(message, 'user');
+
     const now = Date.now();
     state.messageLimits.minuteTimestamps.push(now);
     state.messageLimits.dailyTimestamps.push(now);
     localStorage.setItem('messageLimits', JSON.stringify(state.messageLimits));
+
+    // getAIResponse sẽ tự động xử lý việc thêm tin nhắn User (cả text và ảnh) và dọn dẹp preview ảnh
     getAIResponse(message);
     dom.chatInput.value = '';
     checkRateLimitsAndToggleButtonState();
 }
+
 
 /**
  * Xử lý yêu cầu ngừng tạo phản hồi từ AI.
@@ -72,9 +77,11 @@ function handleStopGeneration() {
  */
 function handleSaveApiKey() {
     const key = dom.apiKeyInput.value.trim();
+
     if (key && key !== "null" && key !== "undefined") {
         localStorage.setItem('googleApiKey', key);
         state.currentApiKey = key;
+
         hideApiKeyModal();
         clearInputError();
         addMessage("apiKeySavedMessage", 'ai');
@@ -155,6 +162,24 @@ dom.closeApiKeyModalButton.addEventListener('click', hideApiKeyModal);
 dom.apiKeyModal.addEventListener('click', (event) => {
     if (event.target === dom.apiKeyModal) hideApiKeyModal();
 });
+
+// --- Lắng nghe sự kiện Upload ảnh ---
+dom.attachButton.addEventListener('click', () => {
+    dom.imageInput.click();
+});
+dom.imageInput.addEventListener('change', function() {
+    if (this.files && this.files[0]) {
+        handleImageSelect(this.files[0]);
+    }
+});
+dom.clearImageButton.addEventListener('click', clearSelectedImage);
+
+// --- Lắng nghe sự kiện Toggle Google Search ---
+dom.toggleSearchBtn.addEventListener('click', () => {
+    state.isSearchEnabled = !state.isSearchEnabled;
+    dom.toggleSearchBtn.classList.toggle('active', state.isSearchEnabled);
+});
+
 document.addEventListener('keydown', (event) => {
     handleModalEscapeKey(event);
     if (event.key === 'Escape' && !dom.settingsDropdown.classList.contains('hidden')) {
@@ -167,5 +192,12 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeTheme();
     loadMessageLimits();
     initializeLanguage();
+    
+    // Đồng bộ trạng thái ban đầu của Google Search toggle button
+    dom.toggleSearchBtn.classList.toggle('active', state.isSearchEnabled);
+
+    // Khởi tạo tính năng kéo thả & paste ảnh
+    initializeDragDropAndPaste();
+
     sendInitialPingToAI();
 });

@@ -123,9 +123,10 @@ export function addCopyButtons(container) {
  * @param {string} messageOrKey - Nội dung tin nhắn hoặc khóa dịch thuật cho tin nhắn.
  * @param {'user' | 'ai'} sender - Người gửi tin nhắn ('user' hoặc 'ai').
  * @param {Object.<string, string>} [params={}] - Các tham số để thay thế trong chuỗi dịch (nếu có).
+ * @param {{mimeType: string, data: string}|null} [imageObj=null] - Đối tượng ảnh đính kèm (base64).
  * @returns {HTMLDivElement} The message content element.
  */
-export function addMessage(messageOrKey, sender, params = {}) {
+export function addMessage(messageOrKey, sender, params = {}, imageObj = null) {
     const messageElement = document.createElement('div');
     messageElement.classList.add('message-bubble', `${sender}-message`);
 
@@ -138,7 +139,29 @@ export function addMessage(messageOrKey, sender, params = {}) {
     }
 
     if (sender === 'user') {
-        contentWrapper.textContent = messageText;
+        if (imageObj) {
+            // Render ảnh gửi kèm
+            const imgEl = document.createElement('img');
+            imgEl.className = 'chat-message-image';
+            imgEl.src = `data:${imageObj.mimeType};base64,${imageObj.data}`;
+            imgEl.alt = "Uploaded Image";
+            imgEl.addEventListener('click', () => {
+                const w = window.open();
+                if (w) {
+                    w.document.write(`<img src="${imgEl.src}" style="max-width:100%; max-height:100%; display:block; margin:auto;" />`);
+                }
+            });
+            contentWrapper.appendChild(imgEl);
+
+            // Render văn bản nếu có
+            if (messageText) {
+                const textEl = document.createElement('div');
+                textEl.textContent = messageText;
+                contentWrapper.appendChild(textEl);
+            }
+        } else {
+            contentWrapper.textContent = messageText;
+        }
     } else {
         contentWrapper.innerHTML = marked.parse(messageText);
         if (messageText) {
@@ -333,3 +356,122 @@ export function addCopyMessageButton(messageElement) {
 
     messageElement.appendChild(copyButton);
 }
+
+// ==================== XỬ LÝ HÌNH ẢNH NÂNG CAO ====================
+
+/**
+ * Xử lý khi người dùng chọn một tệp hình ảnh.
+ * Đọc file dưới dạng base64, cập nhật preview UI và state.
+ * @param {File} file - Tệp tin hình ảnh được chọn.
+ */
+export function handleImageSelect(file) {
+    if (!file) return;
+
+    // Kiểm tra định dạng file
+    if (!file.type.startsWith('image/')) {
+        alert(TRANSLATIONS[state.currentLanguage].imageUploadFormatError);
+        return;
+    }
+
+    // Kiểm tra dung lượng (giới hạn 4MB)
+    const MAX_SIZE = 4 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+        alert(TRANSLATIONS[state.currentLanguage].imageUploadSizeLimit);
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const base64Data = e.target.result.split(',')[1];
+        const mimeType = file.type;
+
+        // Lưu vào state
+        state.currentSelectedImage = {
+            mimeType: mimeType,
+            data: base64Data
+        };
+
+        // Cập nhật UI Preview
+        dom.imagePreview.src = e.target.result;
+        dom.imagePreviewContainer.classList.remove('hidden');
+        dom.chatInput.focus();
+
+        // Cập nhật nút gửi (cho dù input trống vẫn cho gửi nếu có ảnh)
+        checkRateLimitsAndToggleButtonState();
+    };
+    reader.readAsDataURL(file);
+}
+
+/**
+ * Xóa hình ảnh đang chọn, ẩn vùng preview UI và cập nhật state.
+ */
+export function clearSelectedImage() {
+    state.currentSelectedImage = null;
+    dom.imagePreview.src = '';
+    dom.imagePreviewContainer.classList.add('hidden');
+    dom.imageInput.value = '';
+    
+    // Cập nhật lại nút gửi
+    checkRateLimitsAndToggleButtonState();
+}
+
+/**
+ * Khởi tạo kéo thả (Drag & Drop) và dán ảnh (Paste) cho ô chat.
+ */
+export function initializeDragDropAndPaste() {
+    const chatInput = dom.chatInput;
+
+    // --- Xử lý sự kiện dán (Paste) từ Clipboard (Ctrl + V) ---
+    chatInput.addEventListener('paste', (event) => {
+        const items = (event.clipboardData || event.originalEvent.clipboardData).items;
+        for (const item of items) {
+            if (item.type.indexOf('image') !== -1) {
+                const file = item.getAsFile();
+                handleImageSelect(file);
+                event.preventDefault(); // Ngăn dán chuỗi nhị phân text của ảnh
+                break;
+            }
+        }
+    });
+
+    // --- Xử lý sự kiện Kéo thả (Drag & Drop) ---
+    const preventDefaults = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        document.body.addEventListener(eventName, preventDefaults, false);
+    });
+
+    // Tạo hiệu ứng dragover trực quan
+    const chatContainer = document.querySelector('.chat-container');
+    
+    chatContainer.addEventListener('dragenter', () => {
+        chatContainer.style.borderColor = '#168AFE';
+        chatContainer.style.boxShadow = '0 8px 30px rgba(22, 138, 254, 0.2)';
+    }, false);
+
+    chatContainer.addEventListener('dragleave', (e) => {
+        // Kiểm tra xem chuột đã thực sự rời container chưa
+        if (!chatContainer.contains(e.relatedTarget)) {
+            chatContainer.style.borderColor = 'var(--border-color)';
+            chatContainer.style.boxShadow = '0 8px 30px rgba(0, 0, 0, 0.1)';
+        }
+    }, false);
+
+    chatContainer.addEventListener('drop', (e) => {
+        chatContainer.style.borderColor = 'var(--border-color)';
+        chatContainer.style.boxShadow = '0 8px 30px rgba(0, 0, 0, 0.1)';
+        
+        const dt = e.dataTransfer;
+        const files = dt.files;
+
+        if (files && files.length > 0) {
+            const file = files[0];
+            if (file.type.startsWith('image/')) {
+                handleImageSelect(file);
+            }
+        }
+    }, false);
+}

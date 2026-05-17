@@ -1,7 +1,7 @@
 import { GoogleGenAI } from 'https://cdn.jsdelivr.net/npm/@google/genai@1.5.1/+esm';
 import state from './state.js';
-import { AI_MODEL_NAME, SUB_PROMPT, PING_PROMPT, TRANSLATIONS } from './config.js';
-import { addMessage, addThinkingBlock, showApiKeyModal, checkRateLimitsAndToggleButtonState, addCopyButtons, addCopyMessageButton } from './ui.js';
+import { AI_MODEL_NAME, PING_PROMPT, TRANSLATIONS } from './config.js';
+import { addMessage, addThinkingBlock, showApiKeyModal, checkRateLimitsAndToggleButtonState, addCopyButtons, addCopyMessageButton, clearSelectedImage } from './ui.js';
 import * as dom from './dom.js';
 
 /** @const {number} Số lượt hội thoại gần nhất gửi kèm để AI hiểu context (mỗi lượt gồm 1 user + 1 model). */
@@ -20,8 +20,9 @@ function getCurrentFullLanguageName() {
  * Tự động phát hiện chunk có cờ `thought: true` để hiển thị thinking block riêng biệt.
  * @async
  * @param {string} userPromptContent - Nội dung prompt từ người dùng.
+ * @param {boolean} [showThinking=true] - Có hiển thị thinking block hay không.
  */
-export async function getAIResponse(userPromptContent, showThinking = true) {
+export async function getAIResponse(userPromptContent, showThinking = true, isPing = false) {
     if (!state.currentApiKey) {
         addMessage("inputErrorApiKey", 'ai');
         showApiKeyModal();
@@ -33,16 +34,40 @@ export async function getAIResponse(userPromptContent, showThinking = true) {
     checkRateLimitsAndToggleButtonState();
 
     const fullLanguageName = getCurrentFullLanguageName();
-    const completePromptText = userPromptContent + SUB_PROMPT + fullLanguageName;
+    const completePromptText = userPromptContent;
+
+    // --- Xử lý hình ảnh gửi kèm ---
+    const imageToSend = state.currentSelectedImage;
+    if (imageToSend) {
+        // Dọn dẹp preview ảnh ngay lập tức sau khi lấy dữ liệu gửi đi
+        clearSelectedImage();
+    }
+
+    // Hiển thị bong bóng tin nhắn của User (kèm thumbnail ảnh nếu có) - Bỏ qua nếu là tin nhắn ping khởi tạo
+    if (!isPing) {
+        addMessage(userPromptContent, 'user', {}, imageToSend);
+    }
+
     const aiMessageContent = addMessage("", 'ai');
     const messageBubble = aiMessageContent.parentElement;
 
+    // --- Xây dựng parts cho turn hiện tại ---
+    const userParts = [];
+    if (imageToSend) {
+        userParts.push({
+            inlineData: {
+                mimeType: imageToSend.mimeType,
+                data: imageToSend.data
+            }
+        });
+    }
+    userParts.push({ text: completePromptText });
+
     // --- Xây dựng contents kèm lịch sử hội thoại (multi-turn context) ---
-    // Lấy tối đa CONTEXT_TURNS lượt gần nhất (mỗi lượt = 2 phần tử: user + model)
     const historySlice = state.conversationHistory.slice(-(CONTEXT_TURNS * 2));
     const contents = [
         ...historySlice,
-        { role: "user", parts: [{ text: completePromptText }] }
+        { role: "user", parts: userParts }
     ];
 
     // --- Thinking block setup (bỏ qua nếu showThinking = false) ---
@@ -110,11 +135,29 @@ export async function getAIResponse(userPromptContent, showThinking = true) {
 
     try {
         const genAI = new GoogleGenAI({ apiKey: state.currentApiKey });
+
+        // Xây dựng config giống với test.html
+        const config = {
+            generationConfig: { temperature: 0.7 }
+        };
+
+        // Bật Google Search nếu được chọn
+        if (state.isSearchEnabled) {
+            config.tools = [{ googleSearch: {} }];
+        }
+
+        // Mặc định luôn bật Thinking Mode (suy luận sâu) cho gemma-4-31b-it theo yêu cầu
+        config.thinkingConfig = { thinkingLevel: 'HIGH' };
+
+        config.systemInstruction = `Chỉ trả lời bằng ngôn ngữ ${fullLanguageName}.`;
+
         const stream = await genAI.models.generateContentStream({
             model: AI_MODEL_NAME,
             contents,
-            generationConfig: { temperature: 0.7 }
+            config
         });
+
+
 
         for await (const chunk of stream) {
             if (state.stopGeneration) {
@@ -166,7 +209,7 @@ export async function getAIResponse(userPromptContent, showThinking = true) {
         if (showThinking && fullResponseText.trim()) {
             state.conversationHistory = [
                 ...state.conversationHistory,
-                { role: "user",  parts: [{ text: completePromptText }] },
+                { role: "user", parts: userParts },
                 { role: "model", parts: [{ text: fullResponseText }] }
             ];
         }
@@ -177,11 +220,12 @@ export async function getAIResponse(userPromptContent, showThinking = true) {
     }
 }
 
+
 /**
  * Gửi một yêu cầu "ping" ban đầu đến AI để khởi động hoặc kiểm tra kết nối.
  * @async
  */
 export async function sendInitialPingToAI() {
     state.isApiCallInProgress = true;
-    getAIResponse(PING_PROMPT, false); // Bỏ qua thinking block cho câu chào giới thiệu
+    getAIResponse(PING_PROMPT, false, true); // Bỏ qua thinking block và ẩn User prompt cho câu chào giới thiệu
 }

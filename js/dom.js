@@ -42,3 +42,18 @@ export const menuLanguageIndicator = document.getElementById('menuLanguageIndica
 export const menuThemeIconLight = document.getElementById('menuThemeIconLight');
 /** @type {HTMLElement} Icon giao diện tối trong menu. */
 export const menuThemeIconDark = document.getElementById('menuThemeIconDark');
+
+// --- Các phần tử DOM nâng cao mới cho Gemma 4 ---
+/** @type {HTMLButtonElement} Nút đính kèm ảnh. */
+export const attachButton = document.getElementById('attachButton');
+/** @type {HTMLInputElement} File input ẩn để chọn ảnh. */
+export const imageInput = document.getElementById('imageInput');
+/** @type {HTMLDivElement} Vùng preview ảnh đã chọn. */
+export const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+/** @type {HTMLImageElement} Ảnh preview thực tế. */
+export const imagePreview = document.getElementById('imagePreview');
+/** @type {HTMLButtonElement} Nút xóa ảnh preview. */
+export const clearImageButton = document.getElementById('clearImageButton');
+
+/** @type {HTMLButtonElement} Nút toggle Google Search. */
+export const toggleSearchBtn = document.getElementById('toggleSearchBtn');

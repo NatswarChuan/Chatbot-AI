@@ -59,6 +59,10 @@ export const TRANSLATIONS = {
       'thinkingDoneLabel': 'Đã suy nghĩ xong',
       'thinkingToggleShow': 'Xem quá trình suy nghĩ',
       'thinkingToggleHide': 'Ẩn quá trình suy nghĩ',
+      'toggleGoogleSearch': 'Google Search',
+      'toggleThinkingMode': 'Suy luận sâu',
+      'imageUploadSizeLimit': 'Ảnh quá lớn. Giới hạn là 4MB.',
+      'imageUploadFormatError': 'Chỉ chấp nhận định dạng ảnh (JPEG, PNG, WEBP, GIF).',
     },
     'en': {
       'fullLanguageName': 'English',
@@ -89,5 +93,9 @@ export const TRANSLATIONS = {
       'thinkingDoneLabel': 'Thought for a while',
       'thinkingToggleShow': 'View thinking process',
       'thinkingToggleHide': 'Hide thinking process',
+      'toggleGoogleSearch': 'Google Search',
+      'toggleThinkingMode': 'Thinking Mode',
+      'imageUploadSizeLimit': 'Image too large. Limit is 4MB.',
+      'imageUploadFormatError': 'Only image formats (JPEG, PNG, WEBP, GIF) are allowed.',
     }
   };

@@ -129,11 +129,30 @@
     </main>
     <footer class="chat-input-area">
       <div class="chat-input-main">
+        <!-- Nút đính kèm ảnh -->
+        <button id="attachButton" class="attach-button" aria-label="Đính kèm hình ảnh">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+        </button>
+        <input type="file" id="imageInput" accept="image/jpeg,image/png,image/webp,image/gif" class="hidden" style="display: none;">
+
         <div id="chatInputWrapper" class="chat-input-wrapper">
+          <!-- Vùng xem trước ảnh (Image Preview) -->
+          <div id="imagePreviewContainer" class="image-preview-container hidden">
+            <div class="image-preview-wrapper">
+              <img id="imagePreview" src="" alt="Selected Preview">
+              <button id="clearImageButton" class="clear-image-button" aria-label="Xóa ảnh">×</button>
+            </div>
+          </div>
+
           <textarea id="chatInput" class="chat-input" placeholder="Nhắn tin cho AI..."
             data-translation-key="chatInputPlaceholder" autocomplete="off" rows="1"></textarea>
           <div id="charCounter" class="char-counter">0/2000</div>
         </div>
+
         <button id="stopGeneratingButton" class="send-button hidden" aria-label="Ngừng trả lời">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -148,10 +167,20 @@
           </svg>
         </button>
       </div>
+
+      <!-- Google Search Toggle -->
+      <div class="chat-input-controls">
+        <button id="toggleSearchBtn" class="control-pill" aria-label="Toggle Google Search">
+          <span class="pill-icon">🌐</span>
+          <span data-translation-key="toggleGoogleSearch">Google Search</span>
+        </button>
+      </div>
+
       <div id="inputErrorMessage" class="input-error-message" role="alert" style="display: none;"></div>
     </footer>
   </article>
 
+  <!-- Modal API Key -->
   <div id="apiKeyModal"
     class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center hidden"
     style="pointer-events: none; z-index: 1050;" role="dialog" aria-modal="true" aria-labelledby="apiKeyModalTitle">
@@ -163,18 +192,21 @@
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
       </button>
-      <h2 id="apiKeyModalTitle" class="text-2xl font-semibold mb-4" data-translation-key="apiKeyModalTitle">Nhập API Key
-        của Google AI</h2>
-      <p class="mb-6" data-translation-key="apiKeyModalDescription">
-        Để sử dụng chatbot, bạn cần cung cấp API Key. Bạn có thể lấy API Key từ
-        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="font-medium">Google AI Studio</a>.
+      <h2 id="apiKeyModalTitle" class="text-2xl font-semibold mb-4" data-translation-key="apiKeyModalTitle">Nhập API Key của Google AI</h2>
+      <p class="mb-6 text-sm" data-translation-key="apiKeyModalDescription">
+        Để sử dụng chatbot, bạn cần cung cấp API Key. Bạn có thể lấy API Key từ Google AI Studio.
       </p>
-      <input type="password" id="apiKeyInput" class="w-full p-3 border border-gray-300 rounded-md mb-6"
-        placeholder="API Key của bạn" data-translation-key="apiKeyModalInputPlaceholder">
+
+      <!-- Nhập API Key -->
+      <div class="mb-6">
+        <label for="apiKeyInput" class="block text-sm font-semibold mb-2" data-translation-key="apiKeyModalInputPlaceholder">API Key của bạn</label>
+        <input type="password" id="apiKeyInput" class="w-full p-3 border border-gray-300 rounded-md"
+          placeholder="API Key của bạn" data-translation-key="apiKeyModalInputPlaceholder">
+      </div>
+
       <div class="flex justify-end">
-        <button id="saveApiKeyButton" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
-          data-translation-key="apiKeyModalSaveButton">Lưu
-          Key</button>
+        <button id="saveApiKeyButton" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 font-medium"
+          data-translation-key="apiKeyModalSaveButton">Lưu Key</button>
       </div>
     </div>
   </div>
